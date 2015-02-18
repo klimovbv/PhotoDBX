@@ -28,8 +28,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        AndroidAuthSession session = buildSession();
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+        AndroidAuthSession session = buildSession(); //+
+        mDBApi = new DropboxAPI<AndroidAuthSession>(session);//+
     }
 
     @Override
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void loadAuth(AndroidAuthSession session) {
+    private void loadAuth(AndroidAuthSession session) { //+
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
 
     }
 
-    private AndroidAuthSession buildSession() {
+    private AndroidAuthSession buildSession() {  //+
         AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeyPair);
         loadAuth(session);
@@ -87,6 +87,10 @@ public class MainActivity extends Activity {
     }
 
     public void onClickLogin(View view) {
-        mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        String key = prefs.getString(ACCESS_KEY_NAME, null);
+        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        /*mDBApi.getSession().startOAuth2Authentication(MainActivity.this);//+*/
+        LoginClass.makingSession(key, secret);
     }
 }
