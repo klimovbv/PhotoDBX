@@ -23,19 +23,25 @@ public class MainActivity extends Activity {
     private final String APP_SECRET = "qqfvu5wtkqft9uz";
     public static DropboxAPI<AndroidAuthSession> mDBApi;
     private Boolean isLoggedIn;
+    LoginClass loginClass = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        AndroidAuthSession session = buildSession(); //+
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);//+
+        /*AndroidAuthSession session = buildSession();
+        mDBApi = new DropboxAPI<AndroidAuthSession>(session);//+*/
+        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        String key = prefs.getString(ACCESS_KEY_NAME, null);
+        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        loginClass = new LoginClass();
+        loginClass.makingSession(key, secret);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mDBApi.getSession().authenticationSuccessful()) {
+       /* if (mDBApi.getSession().authenticationSuccessful()) {
             try {
                 mDBApi.getSession().finishAuthentication();
                 String accessToken = mDBApi.getSession().getOAuth2AccessToken();
@@ -51,7 +57,7 @@ public class MainActivity extends Activity {
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
             }
-        }
+        }*/
     }
 
     public void onClickCameraButton(View view) {
@@ -87,10 +93,10 @@ public class MainActivity extends Activity {
     }
 
     public void onClickLogin(View view) {
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        /*SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        /*mDBApi.getSession().startOAuth2Authentication(MainActivity.this);//+*/
-        LoginClass.makingSession(key, secret);
+        String secret = prefs.getString(ACCESS_SECRET_NAME, null);*/
+        loginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+
     }
 }
