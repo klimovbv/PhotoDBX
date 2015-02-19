@@ -1,6 +1,7 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -21,6 +22,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
+
+    private static final String ACCOUNT_PREFS_NAME = "prefs";
+    private static final String ACCESS_KEY_NAME = "ACCES_KEY";
+    private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+    LoginClass loginClass = null;
 
     private static final String TAG = "myLogs";
     private Camera camera;
@@ -45,6 +51,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         holder.addCallback(this);
         cameraId = 0;
+
+        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        String key = prefs.getString(ACCESS_KEY_NAME, null);
+        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        Log.d ("myLogs", key + " _  " + secret);
+        loginClass = new LoginClass();
+        loginClass.makingSession(key, secret);
      }
 
     @Override
@@ -101,7 +114,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                    FileOutputStream outStream = new FileOutputStream(photoFile);
                     outStream.write(bytes);
                     outStream.close();
-                    UploadPicture upload = new UploadPicture(CameraActivity.this, MainActivity.mDBApi,
+                    UploadPicture upload = new UploadPicture(CameraActivity.this, loginClass.mDBApi,
                             PHOTO_DIR, photoFile);
                     upload.execute();
                 } catch (FileNotFoundException e) {
