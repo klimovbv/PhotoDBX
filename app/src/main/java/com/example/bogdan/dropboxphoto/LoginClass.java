@@ -22,8 +22,10 @@ public class LoginClass {
     public static Boolean isLoggedIn;
     private static String mKey;
     private static String mSecret;
+
     public static DropboxAPI<AndroidAuthSession> mDBApi;
     public static void makingSession(String key, String secret) {
+
         mKey = key;
         mSecret = secret;
         AndroidAuthSession session = buildSession();

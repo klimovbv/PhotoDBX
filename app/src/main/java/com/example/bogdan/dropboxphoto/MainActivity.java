@@ -67,6 +67,21 @@ public class MainActivity extends Activity {
     }
 
     public void onClickLogin(View view) {
-        loginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+        if (loginClass.isLoggedIn) {
+            Toast toast = Toast.makeText(this, "You have already logged in", Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            loginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+        }
+    }
+
+    public void onClickVideoButton(View view) {
+        if (loginClass.isLoggedIn) {
+            Intent intent = new Intent(this, VideoActivity.class);
+            startActivity(intent);
+        } else {
+            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 }
