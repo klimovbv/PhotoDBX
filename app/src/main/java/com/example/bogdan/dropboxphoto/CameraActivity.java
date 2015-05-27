@@ -1,12 +1,15 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -20,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -37,6 +41,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     Button buttonPhoto;
     String fileName;
     private final String PHOTO_DIR = "/Photos/";
+    Handler uploadHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         holder.addCallback(this);
         cameraId = 0;
 
+        uploadHandler = new DownloadHandler(this);
+
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
@@ -59,6 +66,30 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
      }
+
+    /**
+     * @class DownloadHandler
+     *
+     * @brief A nested class that inherits from Handler and uses its
+     *        handleMessage() hook method to process Messages sent to
+     *        it from the DownloadService.
+     */
+    private static class DownloadHandler extends Handler {
+        /**
+         * Allows Activity to be garbage collected properly.
+         */
+        private WeakReference<CameraActivity> mActivity;
+
+        /**
+         * Class constructor constructs mActivity as weak reference
+         * to the activity
+         *
+         * @param activity The corresponding activity
+         */
+        public DownloadHandler(CameraActivity activity) {
+            mActivity = new WeakReference<CameraActivity>(activity);
+        }
+    }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -114,9 +145,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                    FileOutputStream outStream = new FileOutputStream(photoFile);
                     outStream.write(bytes);
                     outStream.close();
-                    UploadPicture upload = new UploadPicture(CameraActivity.this, loginClass.mDBApi,
+                    /*UploadPicture upload = new UploadPicture(CameraActivity.this, loginClass.mDBApi,
                             PHOTO_DIR, photoFile);
-                    upload.execute();
+                    upload.execute();*/
+
+                    Intent intent = UploadService.makeIntent(CameraActivity.this, fileName, uploadHandler);
                 } catch (FileNotFoundException e) {
                     Log.d(TAG, "File  Not Found!!!", e);
                 } catch (IOException e) {
