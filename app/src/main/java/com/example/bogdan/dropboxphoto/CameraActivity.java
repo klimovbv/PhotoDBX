@@ -42,6 +42,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     String fileName;
     private final String PHOTO_DIR = "/Photos/";
     Handler uploadHandler;
+    public String key, secret;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +61,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         uploadHandler = new DownloadHandler(this);
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        key = prefs.getString(ACCESS_KEY_NAME, null);
+        secret = prefs.getString(ACCESS_SECRET_NAME, null);
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
@@ -149,7 +150,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                             PHOTO_DIR, photoFile);
                     upload.execute();*/
 
-                    Intent intent = UploadService.makeIntent(CameraActivity.this, fileName, uploadHandler);
+                    Intent intent = new Intent (CameraActivity.this, UploadService.class);
+                    intent.putExtra("key", key);
+                    intent.putExtra("secret",  secret);
+                    intent.putExtra("filePath",fileName);
+                    intent.putExtra("dirPath", PHOTO_DIR);
+                    startService(intent);
                 } catch (FileNotFoundException e) {
                     Log.d(TAG, "File  Not Found!!!", e);
                 } catch (IOException e) {

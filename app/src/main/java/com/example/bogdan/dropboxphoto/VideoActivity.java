@@ -1,6 +1,7 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
@@ -44,6 +45,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     MediaRecorder mediaRecorder;
     File videoFile;
 
+    public String key, secret;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +62,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         cameraId = 0;
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        key = prefs.getString(ACCESS_KEY_NAME, null);
+        secret = prefs.getString(ACCESS_SECRET_NAME, null);
         Log.d("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
@@ -192,9 +195,15 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (mediaRecorder != null) {
             mediaRecorder.stop();
             releaseMediaRecorder();
-            UploadPicture upload = new UploadPicture(VideoActivity.this, loginClass.mDBApi,
+            Intent intent = new Intent (VideoActivity.this, UploadService.class);
+            intent.putExtra("key", key);
+            intent.putExtra("secret",  secret);
+            intent.putExtra("filePath",videoFile.getAbsolutePath());
+            intent.putExtra("dirPath", VIDEO_DIR);
+            /*UploadPicture upload = new UploadPicture(VideoActivity.this, loginClass.mDBApi,
                       VIDEO_DIR, videoFile);
-            upload.execute();
+            upload.execute();*/
+            startService(intent);
         }
     }
     private boolean prepareVideoRecorder() {
