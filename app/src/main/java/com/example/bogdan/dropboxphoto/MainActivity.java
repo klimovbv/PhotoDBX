@@ -14,6 +14,7 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
 
+
 public class MainActivity extends Activity {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
@@ -21,6 +22,7 @@ public class MainActivity extends Activity {
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
     private Boolean isLoggedIn = false;
     LoginClass loginClass = null;
+    /*private DbxAccountManager mDbxAcctMgr;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,11 @@ public class MainActivity extends Activity {
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
+
+        /*mDbxAcctMgr = DbxAccountManager.getInstance(getApplicationContext(), "e7r6jtptl6t3rz9", "qqfvu5wtkqft9uz");
+        Log.d("myLogs", "Manage logged in" + mDbxAcctMgr.hasLinkedAccount());*/
     }
+
 
     @Override
     protected void onResume() {
@@ -83,5 +89,15 @@ public class MainActivity extends Activity {
             Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
             toast.show();
         }
+    }
+
+    public void onClickListButton(View view) {
+        Intent intent = new Intent(this, ListActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClickManagerButton(View view) {
+        Intent intent = new Intent(this, ListActivityManager.class);
+        startActivity(intent);
     }
 }

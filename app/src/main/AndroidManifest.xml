@@ -2,19 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.bogdan.dropboxphoto" >
 
-    <uses-sdk android:minSdkVersion="19" />
-    android:versionCode="1"
-    android:versionName="1.0">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.RECORD_VIDEO" />
 
-    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <android:uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -49,6 +45,14 @@
         </activity>
         <activity
             android:name=".VideoActivity"
+            android:label="PhotoToDropBox" >
+        </activity>
+        <activity
+            android:name=".ListActivity"
+            android:label="PhotoToDropBox" >
+        </activity>
+        <activity
+            android:name=".ListActivityManager"
             android:label="PhotoToDropBox" >
         </activity>
 

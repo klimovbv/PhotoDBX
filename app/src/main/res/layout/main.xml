@@ -42,6 +42,30 @@
         android:textStyle="bold"
         android:onClick="onClickVideoButton"/>
 
+    <Button
+        android:id="@+id/file_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#176CEC"
+        android:text="Show List Of Files"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="onClickListButton"/>
+
+    <Button
+        android:id="@+id/file_manager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#176CEC"
+        android:text="Show Fule Manager"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="onClickManagerButton"/>
+
     <!--<Button
         android:id="@+id/list_files"
         android:layout_width="match_parent"
