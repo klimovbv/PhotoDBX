@@ -2,8 +2,10 @@ package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.DropBoxManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -16,6 +18,8 @@ import com.dropbox.client2.exception.DropboxException;
 
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,7 +42,9 @@ public class ListActivity extends Activity {
     LoginClass loginClass;
     Entry entries;
     Handler handler;//для передачи имен файлов из потока DBX в UI поток
-
+    private Drawable mDrawable = null;
+    private String mFilnameName;
+    File thumbFile, thumbFile2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,23 +102,39 @@ public class ListActivity extends Activity {
                 BufferedReader reader = null;
                 String resultJson = "";
                 try {
-                    /*DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Photos/test1433543735914.jpg", DropboxAPI.ThumbSize.ICON_128x128, DropboxAPI.ThumbFormat.PNG);*/
-                    URL url = new URL("https://api.dropbox.com/1/metadata/auto/test1433543735914.jpg");
+                    thumbFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                            "testthumb" + System.currentTimeMillis() + ".jpg");
+                    thumbFile2 = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                            "testthumb2" + System.currentTimeMillis() + ".png");
+                    mFilnameName = thumbFile.getAbsolutePath();
+                    Log.d("myLogs", "thumbFilw  = " + mFilnameName);
+                    DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Photos/test1433543735914.jpg", DropboxAPI.ThumbSize.ICON_256x256, DropboxAPI.ThumbFormat.JPEG);
+                    /*FileOutputStream fos = new FileOutputStream(thumbFile);*/
+
+
+                    mDrawable = Drawable.createFromStream(dis, mFilnameName);
+                    dis.close();
+                    /*fos.close();*/
+                    /*InputStreamURL url = new URL("https://api.dropbox.com/1/metadata/auto/test1433543735914.jpg");
                     urlConnection = (HttpURLConnection)url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     urlConnection.connect();
 
-                    InputStream inputStream = urlConnection.getInputStream();
+                     inputStream = urlConnection.getInputStream();
                     StringBuffer buffer = new StringBuffer();
                     reader = new BufferedReader(new InputStreamReader(inputStream));
                     String line;
                     while ((line = reader.readLine()) != null){
                         buffer.append(line);
                     }
-                    resultJson = buffer.toString();
+                    resultJson = buffer.toString();*/
 
 
-                } catch (MalformedURLException e) {
+                /*} catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();*/
+                } catch (DropboxException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
