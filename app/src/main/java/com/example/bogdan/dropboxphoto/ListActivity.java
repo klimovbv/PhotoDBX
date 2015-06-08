@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.exception.DropboxException;
 
@@ -95,7 +96,8 @@ public class ListActivity extends Activity {
                 BufferedReader reader = null;
                 String resultJson = "";
                 try {
-                    URL url = new URL("https://api.dropbox.com/1/metadata/auto/Photos/test1433543735914.jpg");
+                    /*DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Photos/test1433543735914.jpg", DropboxAPI.ThumbSize.ICON_128x128, DropboxAPI.ThumbFormat.PNG);*/
+                    URL url = new URL("https://api.dropbox.com/1/metadata/auto/test1433543735914.jpg");
                     urlConnection = (HttpURLConnection)url.openConnection();
                     urlConnection.setRequestMethod("GET");
                     urlConnection.connect();
