@@ -2,6 +2,7 @@ package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -11,16 +12,23 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.exception.DropboxException;
 
+
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +49,7 @@ import java.util.Objects;
  * Created by Boss on 04.06.15.
  */
 public class ListActivity extends Activity {
-
+    private static final int DELETE_ID =1;
     ListView lv;
     LoginClass loginClass1;
     private static final String ACCOUNT_PREFS_NAME = "prefs";
@@ -59,6 +67,40 @@ public class ListActivity extends Activity {
     Bitmap bitmap;
     ArrayList<Map<String, Object>> fileUIArrayList;
     SimpleAdapter adapter;
+    String itemForDelete;
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0,DELETE_ID,0,"Delete file");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        int position = info.position;
+        View view = info.targetView;
+        if (item.getItemId() == DELETE_ID) {
+            TextView v = (TextView)view.findViewById(R.id.textViewList);
+            itemForDelete = v.getText().toString();
+            Toast.makeText(getApplicationContext(),
+                    "Вы выбрали " + itemForDelete, Toast.LENGTH_SHORT).show();
+            fileUIArrayList.remove(position);
+            adapter.notifyDataSetChanged();
+            Thread deleteThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        loginClass.mDBApi.delete("Photos/" + itemForDelete);
+                    } catch (DropboxException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            deleteThread.start();
+            return true;
+        } else return super.onContextItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +112,12 @@ public class ListActivity extends Activity {
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
         loginClass.makingSession(key, secret);
         fileUIArrayList = new ArrayList<Map<String, Object>>();
-        /*final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.list_item, fileUIArrayList);*/
-
         String[] from = {ATTRIBUTE_NAME_TEXT, ATTRIBUTE_NAME_IMAGE};
         int [] to = {R.id.textViewList, R.id.imageViewList};
         adapter = new SimpleAdapter(this, fileUIArrayList, R.layout.list_item,
                 from, to);
-        //позволяем адаптеру получать на вход Biymap для ImageView
+
+        //позволяем адаптеру получать на вход Bitmap для ImageView
         adapter.setViewBinder(new SimpleAdapter.ViewBinder(){
 
             @Override
@@ -90,36 +130,19 @@ public class ListActivity extends Activity {
                     return true;
                 }
                 return false;
-
             }
-
         });
 
         lv.setAdapter(adapter);
-
-
-
+        registerForContextMenu(lv);
 
         final String [] fileNameArray = null;//массив для имен файлов в UI-потоке
         handler = new Handler(){
             public void handleMessage(Message msg){
-
-
-                        /*String message = (String)msg.obj;
-                        m = new HashMap<String, Object>();
-                        m.put(ATTRIBUTE_NAME_TEXT, message);
-                        m.put(ATTRIBUTE_NAME_IMAGE, (Object)msg.obj);*/
                         fileUIArrayList.add(m) ;
                         adapter.notifyDataSetChanged();
-
-
-
             }
         };
-
-
-
-
 
         Thread dataThread = new Thread(new Runnable() {
             Message msg;
@@ -128,7 +151,7 @@ public class ListActivity extends Activity {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
                 String key = prefs.getString(ACCESS_KEY_NAME, null);
                 String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass = new LoginClass();
+
                 loginClass.makingSession(key, secret);
                 Log.d("myLogs", key + " _ " + secret);
                 Log.d("myLogs", "Entry");
@@ -181,40 +204,17 @@ public class ListActivity extends Activity {
 
 
                 try {
-                    /*thumbFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                            "testthumb" + System.currentTimeMillis() + ".jpg");
-                    mFilnameName = thumbFile.getAbsolutePath();
-                    Log.d("myLogs", "thumbFile  = " + mFilnameName);
-                    DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Photos/test1433543735914.jpg", DropboxAPI.ThumbSize.ICON_256x256, DropboxAPI.ThumbFormat.JPEG);
-                    FileOutputStream fos = new FileOutputStream(thumbFile);
-                    *//*BitmapFactory.decodeStream(dis).compress(Bitmap.CompressFormat.JPEG, 100, fos);*//*
-                    bitmap = BitmapFactory.decodeStream(dis);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-
-                    fos.close();
-                    dis.close();*/
                     Entry entries = loginClass.mDBApi.metadata("/Photos/", 0, null, true, null);
                     int i = 0;
                     for (Entry entry : entries.contents) {
                         files.add(entry);
                         dir.add(new String(files.get(i++).path));
                         dir.add(entry.fileName());
-
                         Log.d("myLogs", "FILES: " + entry.fileName());
-
                         DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Photos/" + entry.fileName(),
                                 DropboxAPI.ThumbSize.ICON_256x256, DropboxAPI.ThumbFormat.JPEG);
-                        /*FileOutputStream fos = new FileOutputStream(thumbFile);*/
                         bitmap = BitmapFactory.decodeStream(dis);
                         dis.close();
-
-                        /*Map <String, Object> m = new HashMap<String, Object>();
-                        m.put(ATTRIBUTE_NAME_TEXT, entry.fileName());
-                        m.put(ATTRIBUTE_NAME_IMAGE, bitmap);
-                        msg = handler.obtainMessage(0, 0, 0, m);
-                        *//*msg.obj = bitmap;*//*
-                        handler.sendMessage(msg);*/
-                        /*dis.close();*/
                         m = new HashMap<String, Object>();
                         m.put(ATTRIBUTE_NAME_TEXT,entry.fileName());
                         m.put(ATTRIBUTE_NAME_IMAGE, bitmap);
@@ -224,10 +224,7 @@ public class ListActivity extends Activity {
                     fNames = dir.toArray(new String[dir.size()]);
                     Log.d("myLogs", "FILES Array: " + fNames);
                     Log.d("myLogs", "first FILE : " + (CharSequence)dir.get(0));//имя первого файла
-
-
                     Log.d("myLogs", "first FILE из fNames: " + fNames[0]);
-
                 } catch (DropboxException e) {
                     Log.d("myLogs", "ERROR");
                     e.printStackTrace();
@@ -238,8 +235,5 @@ public class ListActivity extends Activity {
             }
         });
         dataThread.start();
-
-
     }
-
 }
