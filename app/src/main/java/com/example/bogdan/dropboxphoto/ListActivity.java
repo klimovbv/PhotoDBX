@@ -1,6 +1,7 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -117,6 +118,7 @@ public class ListActivity extends Activity {
         adapter = new SimpleAdapter(this, fileUIArrayList, R.layout.list_item,
                 from, to);
 
+
         //позволяем адаптеру получать на вход Bitmap для ImageView
         adapter.setViewBinder(new SimpleAdapter.ViewBinder(){
 
@@ -135,6 +137,15 @@ public class ListActivity extends Activity {
 
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent (getApplicationContext(), PreviewImageActivity.class);
+                TextView v = (TextView)view.findViewById(R.id.textViewList);
+                intent.putExtra("filepath", v.getText().toString());
+                startActivity(intent);
+            }
+        });
 
         final String [] fileNameArray = null;//массив для имен файлов в UI-потоке
         handler = new Handler(){
