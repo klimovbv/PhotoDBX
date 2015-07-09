@@ -1,37 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:layout_gravity="center"
+    android:gravity="center_horizontal">
 
-    <!--<ImageView
+    <com.example.bogdan.dropboxphoto.TouchImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/imageView"
-        android:scaleType="matrix"/>-->
-
-
-    <!--<Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Change camera"
-        android:id="@+id/button"
-        android:layout_gravity="left|bottom"
-        android:onClick="onClickChangeCamera"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Photo"
-        android:id="@+id/button2"
-        android:layout_gravity="right|bottom"
-        android:onClick="onClickPhoto"/>-->
-
-    <WebView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/webView"
         android:layout_gravity="center" />
 
-</FrameLayout>
+</LinearLayout>
+

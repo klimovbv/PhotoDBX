@@ -56,10 +56,11 @@
             android:label="PhotoToDropBox" >
         </activity>
         <activity
-            android:configChanges="orientation"
+
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:name=".PreviewImageActivity"
-            android:label="PhotoToDropBox" >
+            android:label="PhotoToDropBox"
+            android:configChanges="orientation">
         </activity>
 
         <service
