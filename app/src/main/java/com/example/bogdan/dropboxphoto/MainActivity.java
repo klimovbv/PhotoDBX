@@ -113,7 +113,7 @@ public class MainActivity extends Activity {
     }
 
     public void onClickListButton(View view) {
-        Intent intent = new Intent(this, ListActivity.class);
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
         startActivity(intent);
     }
 
@@ -136,5 +136,10 @@ public class MainActivity extends Activity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    public void onPlayVideoButton(View view) {
+        Intent intent = new Intent(this, VideoPlayer.class);
+        startActivity(intent);
     }
 }
