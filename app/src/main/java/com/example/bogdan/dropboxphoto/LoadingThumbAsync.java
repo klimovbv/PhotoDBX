@@ -83,7 +83,7 @@ public class LoadingThumbAsync extends AsyncTask <Void, Void, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap result) {
-        super.onPostExecute(result);
+
         if (!imageView.getTag().toString().equals(path)){
             return;
         } else {
