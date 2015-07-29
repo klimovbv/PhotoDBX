@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.dropbox.chooser.android.DbxChooser;
+/*import com.dropbox.chooser.android.DbxChooser;*/
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
     static final int DBX_CHOOSER_REQUEST = 0;  // You can change this if needed
 
     private Button mChooserButton;
-    private DbxChooser mChooser;
+    /*private DbxChooser mChooser;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
 
-        mChooser = new DbxChooser(APP_KEY);
+        /*mChooser = new DbxChooser(APP_KEY);
 
         mChooserButton = (Button) findViewById(R.id.file_manager);
         mChooserButton.setOnClickListener(new View.OnClickListener() {
@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
                 mChooser.forResultType(DbxChooser.ResultType.PREVIEW_LINK)
                         .launch(MainActivity.this, DBX_CHOOSER_REQUEST);
             }
-        });
+        });*/
 
 
 
@@ -112,8 +112,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void onClickListButton(View view) {
+    public void onClickPhotoList(View view) {
         Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Photos/");
+        startActivity(intent);
+    }
+
+    public void onClickVideoList(View view) {
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Video/");
         startActivity(intent);
     }
 
@@ -122,7 +129,7 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    @Override
+   /* @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == DBX_CHOOSER_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
@@ -136,10 +143,12 @@ public class MainActivity extends Activity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
-    }
+    }*/
 
     public void onPlayVideoButton(View view) {
         Intent intent = new Intent(this, VideoPlayer.class);
         startActivity(intent);
     }
+
+
 }

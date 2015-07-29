@@ -7,7 +7,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/imageViewList"
-        android:src="@drawable/tab_dropbox_inactive"/>
+        android:src="@drawable/abc_spinner_mtrl_am_alpha"/>
     <!--android:layout_width="wrap_content"
         android:layout_height="wrap_content"-->
 

@@ -134,7 +134,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void takePicture() {
-        photoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+        File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
+        sdPath.mkdir();
+        photoFile = new File(sdPath,
                 "test" + System.currentTimeMillis() + ".jpg");
         fileName = photoFile.getAbsolutePath();
         camera.takePicture(null, null, new PictureCallback() {
@@ -146,10 +149,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                    FileOutputStream outStream = new FileOutputStream(photoFile);
                     outStream.write(bytes);
                     outStream.close();
-                    /*UploadPicture upload = new UploadPicture(CameraActivity.this, loginClass.mDBApi,
-                            PHOTO_DIR, photoFile);
-                    upload.execute();*/
-
                     Intent intent = new Intent (CameraActivity.this, UploadService.class);
                     intent.putExtra("key", key);
                     intent.putExtra("secret",  secret);

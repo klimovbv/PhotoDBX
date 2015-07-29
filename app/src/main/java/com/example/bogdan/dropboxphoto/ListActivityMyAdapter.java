@@ -51,6 +51,7 @@ public class ListActivityMyAdapter extends Activity {
     ArrayList<String> fileUIArrayList;
     MyAdapter adapter;
     String itemForDelete;
+    String directory;
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -74,7 +75,7 @@ public class ListActivityMyAdapter extends Activity {
                 @Override
                 public void run() {
                     try {
-                        loginClass.mDBApi.delete("Photos/" + itemForDelete);
+                        loginClass.mDBApi.delete(directory + itemForDelete);
                     } catch (DropboxException e) {
                         e.printStackTrace();
                     }
@@ -89,37 +90,28 @@ public class ListActivityMyAdapter extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_activity);
+        Intent intent = getIntent();
+        directory = intent.getStringExtra("Type");
         lv = (ListView) findViewById(R.id.listView);
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
         loginClass.makingSession(key, secret);
         fileUIArrayList = new ArrayList<String>();
-        adapter = new MyAdapter(this, fileUIArrayList, loginClass.mDBApi);
-
-
-        //позволяем адаптеру получать на вход Bitmap для ImageView
-       /* adapter.setViewBinder(new SimpleAdapter.ViewBinder(){
-
-            @Override
-            public boolean setViewValue(View view, Object data,
-                                        String textRepresentation) {
-                if( (view instanceof ImageView) & (data instanceof Bitmap) ) {
-                    ImageView iv = (ImageView) view;
-                    Bitmap bm = (Bitmap) data;
-                    iv.setImageBitmap(bm);
-                    return true;
-                }
-                return false;
-            }
-        });*/
-
+        adapter = new MyAdapter(this, fileUIArrayList, loginClass.mDBApi, directory);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent (getApplicationContext(), /*PreviewImageActivity.class*/VideoPlayer.class);
+                Intent intent;
+                if (directory.equals("/Photos/")) {
+                    intent = new Intent (getApplicationContext(), PreviewImageActivity.class);
+                }
+                else {
+                    if (directory.equals("/Video/")) ;
+                    intent = new Intent(getApplicationContext(), VideoPlayer.class);
+                }
                 TextView v = (TextView)view.findViewById(R.id.textViewList);
                 intent.putExtra("filepath", v.getText().toString());
                 startActivity(intent);
@@ -134,51 +126,21 @@ public class ListActivityMyAdapter extends Activity {
         };
 
         Thread dataThread = new Thread(new Runnable() {
-            Message msg;
             @Override
             public void run() {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
                 String key = prefs.getString(ACCESS_KEY_NAME, null);
                 String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-
                 loginClass.makingSession(key, secret);
-                Log.d("myLogs", key + " _ " + secret);
-                Log.d("myLogs", "Entry");
-                ArrayList<Entry> files = new ArrayList<Entry>();
-                ArrayList<String> dir = new ArrayList<String>();
-                String [] fNames = null;
-
-
-
                 try {
-                    Entry entries = loginClass.mDBApi.metadata("/Photos/", 0, null, true, null);
-                    int i = 0;
+                    Entry entries = loginClass.mDBApi.metadata(directory, 0, null, true, null);
                     for (Entry entry : entries.contents) {
-                        /*files.add(entry);
-                        *//*dir.add(new String(files.get(i++).path));*//*
-                        dir.add(entry.fileName());
-
-                        DropboxAPI.DropboxInputStream dis = loginClass.mDBApi.getThumbnailStream("/Video/" + entry.fileName(),
-                                DropboxAPI.ThumbSize.ICON_256x256, DropboxAPI.ThumbFormat.JPEG);
-                        bitmap = BitmapFactory.decodeStream(dis);
-                        dis.close();*/
-                        Log.d("myLogs", "FILES: " + entry.fileName());
-
                         fileUIArrayList.add(entry.fileName());
-
-
-
-                        /*m.put(ATTRIBUTE_NAME_IMAGE, bitmap);*/
-                        /*msg = handler.obtainMessage(0, 0, 0, m);*/
-
                     } handler.sendEmptyMessage(0);
-
-
                 } catch (DropboxException e) {
                     Log.d("myLogs", "ERROR");
                     e.printStackTrace();
                 }
-
             }
         });
         dataThread.start();

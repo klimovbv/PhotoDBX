@@ -183,7 +183,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void onClickVideo (View view) {
-        videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+        File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
+        sdPath.mkdir();
+        videoFile = new File(sdPath,
                 "testvideo" + System.currentTimeMillis() + ".3gp");
         if (prepareVideoRecorder()) {
             mediaRecorder.start();

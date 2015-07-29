@@ -46,11 +46,7 @@ public class PreviewImageActivity extends Activity {
         imageView = (TouchImageView)findViewById(R.id.imageView);
         handler = new Handler(){
             public void handleMessage(Message msg){
-
                 changeContent();
-
-
-
             }
         };
         Thread previewThread = new Thread(new Runnable() {

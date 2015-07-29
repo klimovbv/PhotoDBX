@@ -43,16 +43,29 @@
         android:onClick="onClickVideoButton"/>
 
     <Button
-        android:id="@+id/file_list"
+        android:id="@+id/photo_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:background="#176CEC"
-        android:text="Show List Of Files"
+        android:text="Show Photos"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickListButton"/>
+        android:onClick="onClickPhotoList"/>
+
+    <Button
+        android:id="@+id/video_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#176CEC"
+        android:text="Show Video"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="onClickVideoList"
+        android:layout_gravity="center_horizontal" />
 
     <Button
         android:id="@+id/file_manager"
@@ -65,18 +78,6 @@
         android:textColor="#fff"
         android:textStyle="bold"
         android:onClick="onClickManagerButton"/>
-
-    <Button
-        android:id="@+id/videoViewButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="#176CEC"
-        android:text="PlayVideo"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#fff"
-        android:textStyle="bold"
-        android:onClick="onPlayVideoButton"/>
 
     <!--<Button
         android:id="@+id/list_files"

@@ -36,7 +36,6 @@ public class UploadService extends Service {
     public void onCreate() {
         super.onCreate();
         es = Executors.newFixedThreadPool(1);
-
     }
 
     //срабатывает при уничтожении
@@ -61,17 +60,6 @@ public class UploadService extends Service {
         MyRun mr = new MyRun(startId, path, file);
         new Thread(mr).start();
 
-
-        /*Thread downloadThread = new Thread (new Runnable() {
-            @Override
-            public void run() {
-
-
-            }
-        });*/
-
-
-        /*downloadThread.start();*/
         return START_REDELIVER_INTENT;//сервис будет восстановлен после уничтожения
     }
      class MyRun implements Runnable {
@@ -84,7 +72,6 @@ public class UploadService extends Service {
              this.file = file;
              this.path = path;
          }
-
 
          @Override
          public void run() {
@@ -107,90 +94,8 @@ public class UploadService extends Service {
          }
      }
 
-    // работа самого сервиса
-   /* class LoadTask extends AsyncTask <Void, Long, Boolean> {
-
-        private DropboxAPI<?> mApi;
-        private String mPath;
-        private File mFile;
-        private long mFileLen;
-        private DropboxAPI.UploadRequest mRequest;
-        private Context mContext;
-        private final ProgressDialog mDialog;
-
-        public LoadTask(Context context, DropboxAPI<?> api, String dropboxPath,
-                             File file) {
-            mContext = context.getApplicationContext();
-            mFileLen = file.length();
-            mApi = api;
-            mPath = dropboxPath;
-            mFile = file;
-            mDialog = new ProgressDialog(context);
-            mDialog.setMax(100);
-            mDialog.setMessage("Uploading " + file.getName());
-            mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            mDialog.setProgress(0);
-            mDialog.setCancelable(false);
-            mDialog.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                FileInputStream fis = new FileInputStream(mFile);
-                String path = mPath + mFile.getName();
-                mRequest = mApi.putFileOverwriteRequest(path, fis, mFile.length(),
-                        new ProgressListener() {
-                            @Override
-                            public long progressInterval() {
-                                return 500;
-                            }
-
-                            @Override
-                            public void onProgress(long bytes, long total) {
-                                publishProgress(bytes);
-                            }
-                        });
-
-                if (mRequest != null) {
-                    mRequest.upload();
-                    return true;
-                }
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }  catch (DropboxException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        @Override
-        protected void onProgressUpdate(Long... progress) {
-            int percent = (int)(100.0*(double)progress[0]/mFileLen + 0.5);
-            mDialog.setProgress(percent);
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            mDialog.dismiss();
-            if (result) {
-                showToast("Uploaded");
-            } else {
-                showToast("Did not upload");
-            }
-        }
-
-        private void showToast(String msg) {
-            Toast toast = Toast.makeText(mContext, msg, Toast.LENGTH_LONG);
-            toast.show();
-        }
-    }*/
-
     @Override
     public IBinder onBind(Intent intent) {
-
-
         return null;
     }
 }
