@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
@@ -54,11 +57,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private int orientation;
     private SensorManager sensorManager;
     private Sensor accelerometer;
+    float x, y, z;
+    boolean rotate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);*/
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         buttonPhoto = (Button)findViewById(R.id.button2);
@@ -70,6 +75,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         cameraId = 0;
 
         uploadHandler = new DownloadHandler(this);
+        rotate = false;
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
@@ -77,25 +83,29 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
-
-
-
-
-        /*orientationEventListener = new OrientationEventListener(this,
-                SensorManager.SENSOR_DELAY_NORMAL) {
-            @Override
-            public void onOrientationChanged(int orient) {
-                orientation = orient;
-                Log.d("myLogs",  "ORIENTATION CHANGED ==== " + orient);
-            }
-        };*/
+        SensorManager sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        int sensorType = Sensor.TYPE_ORIENTATION;
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
      }
+    final SensorEventListener orientationListener =new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if(event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
+                if (Math.abs(y) < 45){
 
+                }
+            }
+        }
 
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
-
-
-
+        }
+    };
 
     /**
      * @class DownloadHandler
@@ -146,7 +156,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         surface.getHeight() + " / " + surface.getWidth());
         LayoutParams lp = surface.getLayoutParams();
         camera.setDisplayOrientation(90);
-        /*lp.height = previewSurfaceHeight;*/
         Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
         lp.height = (int) (previewSurfaceWidth / aspect);
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
@@ -165,18 +174,26 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera = null;
     }
 
-    private String getScreenOrientation(){
-        Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        return " Ориентация  " + display.getRotation();
-    }
+
 
     public void onClickPhoto(View view) {
-        Log.d("myLogs",  "ORIENTATION ==== " + orientation);
+        Log.d("myLogs",  "ORIENTATION ==== " + x + " / " + y + " / " + z);
+        int scale = 0;
+        rotate = true;
+        if (Math.abs(y) > 45){
+            if (y > 0)
+                scale = 180;
+        }
+        else if (x < 163 && x > 86) {
+            scale = 90;
+        }
 
-        takePicture();
+        else rotate = false;
+
+        takePicture(scale);
     }
 
-    private void takePicture() {
+    private void takePicture(final int i) {
         File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
         sdPath.mkdir();
@@ -186,11 +203,27 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera.takePicture(null, null, new PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
+                if (rotate){
+                    int scale = 0;
+                    switch (cameraId){
+                        case 0:
+                            scale = 90+i;
+                            break;
+                        case 1:
+                            scale = 270-i;
+                            break;
+                    }
+                    bitmap = RotateBitmap(bitmap, scale);
+                }
+
+
                 surfaceDestroyed(holder);
                 surfaceCreated(holder);
                 try {
                    FileOutputStream outStream = new FileOutputStream(photoFile);
-                    outStream.write(bytes);
+                    /*outStream.write(bytes);*/
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (CameraActivity.this, UploadService.class);
                     intent.putExtra("key", key);
@@ -215,5 +248,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         }
         surfaceDestroyed(holder);
         surfaceCreated(holder);
+    }
+
+    public static Bitmap RotateBitmap(Bitmap source, float angle)
+    {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 }
