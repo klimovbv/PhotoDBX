@@ -1,16 +1,24 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
+import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -43,18 +51,21 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private final String PHOTO_DIR = "/Photos/";
     Handler uploadHandler;
     public String key, secret;
+    private int orientation;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        /*setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);*/
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         buttonPhoto = (Button)findViewById(R.id.button2);
         setContentView(R.layout.activity_camera);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        /*holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
         holder.addCallback(this);
         cameraId = 0;
 
@@ -66,7 +77,25 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
+
+
+
+
+        /*orientationEventListener = new OrientationEventListener(this,
+                SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int orient) {
+                orientation = orient;
+                Log.d("myLogs",  "ORIENTATION CHANGED ==== " + orient);
+            }
+        };*/
      }
+
+
+
+
+
+
 
     /**
      * @class DownloadHandler
@@ -90,6 +119,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         public DownloadHandler(CameraActivity activity) {
             mActivity = new WeakReference<CameraActivity>(activity);
         }
+
+
     }
 
     @Override
@@ -108,12 +139,17 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             Log.d(TAG, "IO Exception" + e);
         }
         Camera.Size previewSize = camera.getParameters().getPreviewSize();
-        float aspect = (float) previewSize.width/previewSize.height;
-        int previewSurfaceHeight = surface.getHeight();
+        float aspect = (float) previewSize.height/previewSize.width;
+        int previewSurfaceWidth = surface.getWidth();
+        Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
+                previewSize.width + "surface.getWidth()/surface.getWidth()" +
+                        surface.getHeight() + " / " + surface.getWidth());
         LayoutParams lp = surface.getLayoutParams();
         camera.setDisplayOrientation(90);
-        lp.height = previewSurfaceHeight;
-        lp.width = (int) (previewSurfaceHeight / aspect);
+        /*lp.height = previewSurfaceHeight;*/
+        Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
+        lp.height = (int) (previewSurfaceWidth / aspect);
+        Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
         surface.setLayoutParams(lp);
         camera.startPreview();
     }
@@ -129,7 +165,14 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera = null;
     }
 
+    private String getScreenOrientation(){
+        Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        return " Ориентация  " + display.getRotation();
+    }
+
     public void onClickPhoto(View view) {
+        Log.d("myLogs",  "ORIENTATION ==== " + orientation);
+
         takePicture();
     }
 
