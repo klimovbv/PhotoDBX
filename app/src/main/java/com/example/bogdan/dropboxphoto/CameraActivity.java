@@ -41,6 +41,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+    private static final int PORTRAIT_UP = 1;
+    private static final int PORTRAIT_DOWN = 2;
+    private static final int LANDSCAPE_LEFT = 3;
+    private static final int LANDSCAPE_RIGHT = 4;
     LoginClass loginClass = null;
 
     private static final String TAG = "myLogs";
@@ -54,11 +58,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private final String PHOTO_DIR = "/Photos/";
     Handler uploadHandler;
     public String key, secret;
-    private int orientation;
     private SensorManager sensorManager;
     private Sensor accelerometer;
     float x, y, z;
     boolean rotate;
+    int  orientation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +76,11 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         holder = surface.getHolder();
         /*holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
         holder.addCallback(this);
-        cameraId = 0;
+        cameraId = 1;
 
         uploadHandler = new DownloadHandler(this);
         rotate = false;
+        orientation = PORTRAIT_UP;
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
@@ -84,19 +89,28 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
         SensorManager sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        int sensorType = Sensor.TYPE_ORIENTATION;
+        int sensorType = Sensor.TYPE_GRAVITY;
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
      }
     final SensorEventListener orientationListener =new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if(event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+            if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
-                if (Math.abs(y) < 45){
+                if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
+                    if (y >= 0)
+                        orientation = PORTRAIT_UP;
+                    else
+                        orientation = PORTRAIT_DOWN;
 
+                } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
+                    if (x >=0)
+                        orientation = LANDSCAPE_LEFT;
+                    else
+                        orientation = LANDSCAPE_RIGHT;
                 }
             }
         }
@@ -148,19 +162,22 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
+        surface.setLayoutParams(layoutParams(surface));
+        camera.startPreview();
+    }
+    private LayoutParams layoutParams (SurfaceView surfaceView) {
         Camera.Size previewSize = camera.getParameters().getPreviewSize();
         float aspect = (float) previewSize.height/previewSize.width;
-        int previewSurfaceWidth = surface.getWidth();
+        int previewSurfaceWidth = surfaceView.getWidth();
         Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
                 previewSize.width + "surface.getWidth()/surface.getWidth()" +
-                        surface.getHeight() + " / " + surface.getWidth());
-        LayoutParams lp = surface.getLayoutParams();
+                surfaceView.getHeight() + " / " + surfaceView.getWidth());
+        LayoutParams lp = surfaceView.getLayoutParams();
         camera.setDisplayOrientation(90);
         Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
         lp.height = (int) (previewSurfaceWidth / aspect);
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
-        surface.setLayoutParams(lp);
-        camera.startPreview();
+        return lp;
     }
 
     @Override
@@ -174,22 +191,28 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera = null;
     }
 
-
-
     public void onClickPhoto(View view) {
         Log.d("myLogs",  "ORIENTATION ==== " + x + " / " + y + " / " + z);
         int scale = 0;
         rotate = true;
-        if (Math.abs(y) > 45){
-            if (y > 0)
+        switch (orientation){
+            case PORTRAIT_UP:
+                Log.d("myLogs", "PORTRAIT_UP");
+                break;
+            case PORTRAIT_DOWN:
+                Log.d("myLogs", "PORTRAIT_DOWN");
                 scale = 180;
-        }
-        else if (x < 163 && x > 86) {
-            scale = 90;
-        }
+                break;
+            case LANDSCAPE_LEFT:
+                rotate = false;
+                Log.d("myLogs", "LANDSCAPE_LEFT");
+                break;
+            case LANDSCAPE_RIGHT:
+                scale = 90;
+                Log.d("myLogs", "LANDSCAPE_RIGHT");
+                break;
 
-        else rotate = false;
-
+        }
         takePicture(scale);
     }
 
@@ -216,8 +239,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                     }
                     bitmap = RotateBitmap(bitmap, scale);
                 }
-
-
                 surfaceDestroyed(holder);
                 surfaceCreated(holder);
                 try {
@@ -246,6 +267,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
+
         surfaceDestroyed(holder);
         surfaceCreated(holder);
     }
