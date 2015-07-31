@@ -179,7 +179,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
         return lp;
     }
-
+/
     @Override
     public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
     }
