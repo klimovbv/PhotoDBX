@@ -28,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import java.io.File;
@@ -53,7 +55,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private int cameraId;
     SurfaceHolder holder;
     SurfaceView surface;
-    Button buttonPhoto;
+    Button buttonPhoto, buttonChangeCamera;
     String fileName;
     private final String PHOTO_DIR = "/Photos/";
     Handler uploadHandler;
@@ -70,7 +72,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        buttonPhoto = (Button)findViewById(R.id.button2);
         setContentView(R.layout.activity_camera);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
@@ -97,20 +98,84 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+                Animation animation = AnimationUtils.loadAnimation
+                        (getApplicationContext(), R.anim.rotation);
+                buttonPhoto = (Button)findViewById(R.id.button2);
+                buttonChangeCamera = (Button)findViewById(R.id.button);
+                int prevOrientation = orientation;
+
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
-                    if (y >= 0)
-                        orientation = PORTRAIT_UP;
-                    else
-                        orientation = PORTRAIT_DOWN;
+                    if (y >= 0) {
+                        if (orientation == PORTRAIT_UP) {
+                        } else {
+                            orientation = PORTRAIT_UP;
+                            if (prevOrientation == LANDSCAPE_LEFT) {
+                                buttonPhoto.setRotation(270);
+                                buttonChangeCamera.setRotation(270);
+                            } else if (prevOrientation == PORTRAIT_DOWN) {
+                                buttonPhoto.setRotation(180);
+                                buttonChangeCamera.setRotation(180);
+                            } else {
+                                buttonPhoto.setRotation(90);
+                                buttonChangeCamera.setRotation(90);
+                            }
+                        }
+                    }
+                    else {
+                        if (orientation == PORTRAIT_DOWN) {
+                        } else {
+                            orientation = PORTRAIT_DOWN;
+                            if (prevOrientation == LANDSCAPE_LEFT) {
+                                buttonPhoto.setRotation(90);
+                                buttonChangeCamera.setRotation(90);
+                            } else if (prevOrientation == PORTRAIT_UP) {
+                                buttonPhoto.setRotation(180);
+                                buttonChangeCamera.setRotation(180);
+                            } else {
+                                buttonPhoto.setRotation(270);
+                                buttonChangeCamera.setRotation(270);
+                            }
+                        }
+                    }
 
                 } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
-                    if (x >=0)
-                        orientation = LANDSCAPE_LEFT;
-                    else
-                        orientation = LANDSCAPE_RIGHT;
+                        if (x >=0) {
+                            if (orientation == LANDSCAPE_LEFT) {
+                            } else {
+                                orientation = LANDSCAPE_LEFT;
+                                if (prevOrientation == PORTRAIT_UP) {
+                                    buttonPhoto.setRotation(90);
+                                    buttonChangeCamera.setRotation(90);
+                                } else if (prevOrientation == PORTRAIT_DOWN) {
+                                    buttonPhoto.setRotation(270);
+                                    buttonChangeCamera.setRotation(270);
+                                } else {
+                                    buttonPhoto.setRotation(180);
+                                    buttonChangeCamera.setRotation(180);
+                                }
+                            }
+                        }
+                        else {
+                            if (orientation == LANDSCAPE_RIGHT){
+                            } else {
+                                orientation = LANDSCAPE_RIGHT;
+                                if (prevOrientation == PORTRAIT_UP) {
+                                buttonPhoto.setRotation(270);
+                                buttonChangeCamera.setRotation(270);
+                                } else if (prevOrientation == PORTRAIT_DOWN) {
+                                buttonPhoto.setRotation(90);
+                                buttonChangeCamera.setRotation(90);
+                                } else {
+                                buttonPhoto.setRotation(180);
+                                buttonChangeCamera.setRotation(180);
+                                }
+                            /*buttonChangeCamera.startAnimation(animation);
+                            buttonPhoto.startAnimation(animation);*/
+                            }
+                        }
                 }
             }
         }
@@ -179,7 +244,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
         return lp;
     }
-/
+
     @Override
     public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
     }
