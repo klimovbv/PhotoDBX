@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,6 +79,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         /*holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
         holder.addCallback(this);
         cameraId = 1;
+        buttonPhoto = (Button)findViewById(R.id.button2);
+        buttonChangeCamera = (Button)findViewById(R.id.button);
 
         uploadHandler = new DownloadHandler(this);
         rotate = false;
@@ -100,10 +103,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 Animation animation = AnimationUtils.loadAnimation
                         (getApplicationContext(), R.anim.rotation);
-                buttonPhoto = (Button)findViewById(R.id.button2);
-                buttonChangeCamera = (Button)findViewById(R.id.button);
-                int prevOrientation = orientation;
-
                 x = event.values[0];
                 y = event.values[1];
                 z = event.values[2];
@@ -111,33 +110,17 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
                         } else {
+                            buttonPhoto.setRotation(0);
+                            buttonChangeCamera.setRotation(0);
                             orientation = PORTRAIT_UP;
-                            if (prevOrientation == LANDSCAPE_LEFT) {
-                                buttonPhoto.setRotation(270);
-                                buttonChangeCamera.setRotation(270);
-                            } else if (prevOrientation == PORTRAIT_DOWN) {
-                                buttonPhoto.setRotation(180);
-                                buttonChangeCamera.setRotation(180);
-                            } else {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                            }
                         }
                     }
                     else {
                         if (orientation == PORTRAIT_DOWN) {
                         } else {
+                            buttonPhoto.setRotation(180);
+                            buttonChangeCamera.setRotation(180);
                             orientation = PORTRAIT_DOWN;
-                            if (prevOrientation == LANDSCAPE_LEFT) {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                            } else if (prevOrientation == PORTRAIT_UP) {
-                                buttonPhoto.setRotation(180);
-                                buttonChangeCamera.setRotation(180);
-                            } else {
-                                buttonPhoto.setRotation(270);
-                                buttonChangeCamera.setRotation(270);
-                            }
                         }
                     }
 
@@ -145,35 +128,16 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         if (x >=0) {
                             if (orientation == LANDSCAPE_LEFT) {
                             } else {
-                                orientation = LANDSCAPE_LEFT;
-                                if (prevOrientation == PORTRAIT_UP) {
-                                    buttonPhoto.setRotation(90);
-                                    buttonChangeCamera.setRotation(90);
-                                } else if (prevOrientation == PORTRAIT_DOWN) {
-                                    buttonPhoto.setRotation(270);
-                                    buttonChangeCamera.setRotation(270);
-                                } else {
-                                    buttonPhoto.setRotation(180);
-                                    buttonChangeCamera.setRotation(180);
-                                }
-                            }
+                                buttonPhoto.setRotation(90);
+                                buttonChangeCamera.setRotation(90);
+                                orientation = LANDSCAPE_LEFT;                                                            }
                         }
                         else {
                             if (orientation == LANDSCAPE_RIGHT){
                             } else {
-                                orientation = LANDSCAPE_RIGHT;
-                                if (prevOrientation == PORTRAIT_UP) {
                                 buttonPhoto.setRotation(270);
                                 buttonChangeCamera.setRotation(270);
-                                } else if (prevOrientation == PORTRAIT_DOWN) {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                                } else {
-                                buttonPhoto.setRotation(180);
-                                buttonChangeCamera.setRotation(180);
-                                }
-                            /*buttonChangeCamera.startAnimation(animation);
-                            buttonPhoto.startAnimation(animation);*/
+                                orientation = LANDSCAPE_RIGHT;
                             }
                         }
                 }

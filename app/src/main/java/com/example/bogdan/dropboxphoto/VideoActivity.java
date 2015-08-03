@@ -86,15 +86,24 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
-        Camera.Size previewSize = camera.getParameters().getPreviewSize();
-        float aspect = (float) previewSize.width/previewSize.height;
-        int previewSurfaceHeight = surface.getHeight();
-        LayoutParams lp = surface.getLayoutParams();
-        camera.setDisplayOrientation(90);
-        lp.height = previewSurfaceHeight;
-        lp.width = (int) (previewSurfaceHeight / aspect);
-        surface.setLayoutParams(lp);
+        surface.setLayoutParams(layoutParams(surface));
         camera.startPreview();
+    }
+
+    //вынести в отдельный класс
+    private LayoutParams layoutParams (SurfaceView surfaceView) {
+        Camera.Size previewSize = camera.getParameters().getPreviewSize();
+        float aspect = (float) previewSize.height/previewSize.width;
+        int previewSurfaceWidth = surfaceView.getWidth();
+        Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
+                previewSize.width + "surface.getWidth()/surface.getWidth()" +
+                surfaceView.getHeight() + " / " + surfaceView.getWidth());
+        LayoutParams lp = surfaceView.getLayoutParams();
+        camera.setDisplayOrientation(90);
+        Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
+        lp.height = (int) (previewSurfaceWidth / aspect);
+        Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
+        return lp;
     }
 
     @Override
@@ -123,34 +132,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         camera = null;
     }
 
-    /*public void onClickPhoto(View view) {
-        takePicture();
-    }*/
-
-    /*private void takePicture() {
-        videoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                "testvideo" + System.currentTimeMillis() + ".3gp");
-        fileName = videoFile.getAbsolutePath();
-        camera.takePicture(null, null, new PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] bytes, Camera camera) {
-                surfaceDestroyed(holder);
-                surfaceCreated(holder);
-                try {
-                   FileOutputStream outStream = new FileOutputStream(photoFile);
-                    outStream.write(bytes);
-                    outStream.close();
-                    UploadPicture upload = new UploadPicture(VideoActivity.this, loginClass.mDBApi,
-                            VIDEO_DIR, photoFile);
-                    upload.execute();
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File  Not Found!!!", e);
-                } catch (IOException e) {
-                    Log.d(TAG, "IO Exception", e);
-                }
-            }
-        });
-    }*/
 
     public void onClickChangeCamera(View view) {
         if (cameraId == 0) {
@@ -164,16 +145,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         surfaceCreated(holder);
     }
 
-    /*@Override
-    protected void onPause() {
-        super.onPause();
-        releaseMediaRecorder();
-        if (camera != null)
-            camera.release();
-        camera = null;
-    }*/
-
-    private void releaseMediaRecorder() {
+       private void releaseMediaRecorder() {
         if (mediaRecorder != null) {
             mediaRecorder.reset();
             mediaRecorder.release();
