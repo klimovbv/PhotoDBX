@@ -1,11 +1,16 @@
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -17,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import java.io.File;
@@ -46,6 +53,12 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     File videoFile;
 
     public String key, secret;
+    private static final int PORTRAIT_UP = 1;
+    private static final int PORTRAIT_DOWN = 2;
+    private static final int LANDSCAPE_LEFT = 3;
+    private static final int LANDSCAPE_RIGHT = 4;
+    float x, y, z;
+    int orientation, scale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +66,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        buttonPhoto = (Button)findViewById(R.id.button2);
+        buttonPhoto = (Button) findViewById(R.id.button2);
         setContentView(R.layout.activity_video);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
@@ -68,8 +81,68 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
 
+        orientation = PORTRAIT_UP;
+        scale = 90;
 
-     }
+        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        int sensorType = Sensor.TYPE_GRAVITY;
+        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    final SensorEventListener orientationListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+                x = event.values[0];
+                y = event.values[1];
+                z = event.values[2];
+                if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
+                    if (y >= 0) {
+                        if (orientation == PORTRAIT_UP) {
+                        } else {
+                           /* buttonPhoto.setRotation(0);*/
+                           /* if (cameraId == 0)
+                                scale = 90;
+                            else scale = 270;*/
+                            orientation = PORTRAIT_UP;
+                        }
+                    } else {
+                        if (orientation == PORTRAIT_DOWN) {
+                        } else {
+                            /*buttonPhoto.setRotation(180);*/
+                            /*if (cameraId == 0)
+                                scale = 270;
+                            else scale = 90;*/
+                            orientation = PORTRAIT_DOWN;
+                        }
+                    }
+
+                } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
+                    if (x >= 0) {
+                        if (orientation == LANDSCAPE_LEFT) {
+                        } else {
+                            /*buttonPhoto.setRotation(90);*/
+                            /*scale = 0;*/
+                            orientation = LANDSCAPE_LEFT;
+                        }
+                    } else {
+                        if (orientation == LANDSCAPE_RIGHT) {
+                        } else {
+                            /*buttonPhoto.setRotation(270);*/
+                            /*scale = 180;*/
+                            orientation = LANDSCAPE_RIGHT;
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -194,7 +267,38 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 .get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setPreviewDisplay(surface.getHolder().getSurface());
-
+        if (cameraId == 0) {
+            switch (orientation){
+                case PORTRAIT_UP:
+                    scale = 90;
+                    break;
+                case PORTRAIT_DOWN:
+                    scale = 270;
+                    break;
+                case LANDSCAPE_LEFT:
+                    scale = 0;
+                    break;
+                case LANDSCAPE_RIGHT:
+                    scale = 180;
+                    break;
+            }
+        }
+        else
+            switch (orientation) {
+                case PORTRAIT_UP:
+                    scale = 270;
+                    break;
+                case PORTRAIT_DOWN:
+                    scale = 90;
+                    break;
+                case LANDSCAPE_LEFT:
+                    scale = 0;
+                    break;
+                case LANDSCAPE_RIGHT:
+                    scale = 180;
+                    break;
+        }
+        mediaRecorder.setOrientationHint(scale);
         try {
             mediaRecorder.prepare();
         } catch (Exception e) {
