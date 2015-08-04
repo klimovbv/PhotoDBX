@@ -57,6 +57,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private static final int LANDSCAPE_RIGHT = 4;
     float x, y, z;
     int orientation, scale;
+    int widthforCamera, heightForCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,24 +137,31 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
             Log.d(TAG, "Camera opened ID = " + cameraId);
+            Log.d(TAG, "Camera size = " + camera.getParameters().getPictureSize().height
+            + " / " +camera.getParameters().getPictureSize().width);
         }
         else {
             Log.d(TAG, "camera opened");
         }
         try {
+            surface.setLayoutParams(layoutParams(surface));
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
-        surface.setLayoutParams(layoutParams(surface));
+
+
         camera.startPreview();
     }
 
     //вынести в отдельный класс
     private LayoutParams layoutParams (SurfaceView surfaceView) {
+        /*
+
+        float aspect = (float) cameraSize.height/cameraSize.width;*/
         camera.setDisplayOrientation(90);
-        Camera.Size cameraSize = camera.getParameters().getPictureSize();
-        float aspect = (float) cameraSize.height/cameraSize.width;
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size cameraSize = parameters.getPictureSize();
         int previewSurfaceWidth = surfaceView.getWidth();
         int previewSurfaceHeight = surfaceView.getHeight();
         Log.d("myLogs", "cameraSize.height/cameraSize.width = " + cameraSize.height + " " +
@@ -161,11 +169,27 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 surfaceView.getHeight() + " / " + surfaceView.getWidth());
         LayoutParams lp = surfaceView.getLayoutParams();
         Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
-        lp.height = (int) (previewSurfaceWidth / aspect);
-        lp.width = previewSurfaceWidth;
+        getSizeForCamera(surfaceView.getHeight(), surfaceView.getWidth(),
+                cameraSize.width, cameraSize.height);
+        lp.height = heightForCamera;
+        lp.width = widthforCamera;
+
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
         return lp;
     }
+    private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
+                                  int cameraHeight, int cameraWidth){
+        float scale = Math.min((float)surfaceHeight/(float)cameraHeight,
+                (float)surfaceWidth/(float)cameraWidth);
+        widthforCamera = (int)((float)cameraWidth*scale);
+        heightForCamera = (int)((float)cameraHeight*scale);
+    }
+    /*private void resizePreview (int width, int height) {
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size cameraSize = parameters.getPreviewSize();
+        getSizeForCamera(width, height, cameraSize.height, cameraSize.width);
+
+    }*/
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
@@ -252,6 +276,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 .get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setPreviewDisplay(surface.getHolder().getSurface());
+
         if (cameraId == 0) {
             switch (orientation){
                 case PORTRAIT_UP:
@@ -294,3 +319,24 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         return true;
     }
 }
+
+
+
+/*
+* Camera cam = null;
+
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD){
+  Camera.CameraInfo info = new Camera.CameraInfo();
+  for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+    Camera.getCameraInfo(i, info);
+    if (info.facing == CameraInfo.CAMERA_FACING_BACK){
+    	cam = Camera.open(i);
+    }
+  }
+  if (cam == null){
+    cam = Camera.open(0);
+  }
+}
+else {
+  camera = Camera.open();
+}*/
