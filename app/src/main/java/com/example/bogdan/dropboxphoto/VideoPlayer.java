@@ -49,17 +49,12 @@ public class VideoPlayer extends Activity {
         videoUrl = ("/Video/" + videoName);
         videoView = (VideoView)findViewById(R.id.videoView);
         pDialog = new ProgressDialog(VideoPlayer.this);
-        pDialog.setTitle("dialog title");
+        pDialog.setTitle(videoName);
         pDialog.setMessage("Buffering...");
         pDialog.setIndeterminate(false);
         pDialog.setCancelable(false);
         pDialog.show();
-        /*try {
-            mediaController = new MediaController(VideoPlayer.this);
-            mediaController.setAnchorView(videoView);
-            videoView.setMediaController(mediaController);
-            videoView.setVideoURI(Uri.parse());
-        }*/
+
 
         Thread dataThread = new Thread(new Runnable() {
             @Override
@@ -104,50 +99,5 @@ public class VideoPlayer extends Activity {
         };
 
 
-        /*handler = new Handler() {
-            public void handleMessage(Message msg){
-                *//*String url2 = fileLink.toString();
-                videoView.setVideoURI(Uri.parse(url2));*//*
-            }
-        };
-
-
-        *//*String url1 = "/storage/extSdCard/DCIM/20150709_195709.mp4";*//*
-
-        Thread dataThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-                String key = prefs.getString(ACCESS_KEY_NAME, null);
-                String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass.makingSession(key, secret);
-                url = "https://api.dropbox.com/1/media/auto/Video/testvideo1433359328277.3gp";
-                try {
-                    fileLink = loginClass.mDBApi.media(url, false);
-                } catch (DropboxException e) {
-                    e.printStackTrace();
-                }
-                handler.sendEmptyMessage(0);
-            }
-        });
-        *//*dataThread.start();*//*
-
-
-        *//*videoView.setVideoPath(*//**//*Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)*//**//*
-
-                "/storage/extSdCard/DCIM/20150709_195709.mp4");
-*//*
-
-        videoView.setVideoURI(Uri.parse("https://www.dropbox.com/s/7esr1rae8lw8qne/testvideo1433359328277.3gp"));
-        mediaController = new MediaController(this);
-        *//*String videoSource = "http://www.ebookfrenzy.com/android_book/movie.mp4";*//*
-
-        videoView.setMediaController(mediaController);
-        *//*videoView.start();*//*
-
-
-
-
-*/
     }
 }

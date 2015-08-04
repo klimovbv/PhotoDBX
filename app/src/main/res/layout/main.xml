@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="20dp"
-    android:gravity="center_horizontal"
-    android:orientation="vertical" >
+     >
 
     <Button
         android:id="@+id/dropbox_login"
@@ -19,7 +18,7 @@
         android:onClick="onClickLogin"/>
 
     <Button
-        android:id="@+id/upload_file"
+        android:id="@+id/upload_photo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -28,10 +27,12 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickCameraButton"/>
+        android:onClick="onClickCameraButton"
+        android:layout_above="@+id/upload_video"
+        android:visibility="invisible"/>
 
     <Button
-        android:id="@+id/upload_video"
+        android:id="@id/upload_video"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -40,7 +41,9 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickVideoButton"/>
+        android:onClick="onClickVideoButton"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/photo_list"
@@ -52,7 +55,9 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickPhotoList"/>
+        android:onClick="onClickPhotoList"
+        android:layout_below="@id/dropbox_login"
+        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/video_list"
@@ -65,9 +70,11 @@
         android:textColor="#fff"
         android:textStyle="bold"
         android:onClick="onClickVideoList"
-        android:layout_gravity="center_horizontal" />
+        android:layout_below="@id/photo_list"
+        android:visibility="invisible"
+        />
 
-    <Button
+ <!--   <Button
         android:id="@+id/file_manager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,7 +85,7 @@
         android:textColor="#fff"
         android:textStyle="bold"
         android:onClick="onClickManagerButton"/>
-
+-->
     <!--<Button
         android:id="@+id/list_files"
         android:layout_width="match_parent"
@@ -103,4 +110,4 @@
         </LinearLayout>
     </ScrollView>-->
 
-</LinearLayout>
+</RelativeLayout>

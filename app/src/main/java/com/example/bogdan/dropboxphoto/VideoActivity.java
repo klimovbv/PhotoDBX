@@ -40,12 +40,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     private static final String TAG = "myLogs";
     private Camera camera;
-    File photoFile;
     private int cameraId;
     SurfaceHolder holder;
     SurfaceView surface;
     Button buttonPhoto;
-    String fileName;
     private final String VIDEO_DIR = "/Video/";
 
 
@@ -72,7 +70,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         holder = surface.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         holder.addCallback(this);
-        cameraId = 0;
+        cameraId = 1;
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
@@ -101,19 +99,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
                         } else {
-                           /* buttonPhoto.setRotation(0);*/
-                           /* if (cameraId == 0)
-                                scale = 90;
-                            else scale = 270;*/
                             orientation = PORTRAIT_UP;
                         }
                     } else {
                         if (orientation == PORTRAIT_DOWN) {
                         } else {
-                            /*buttonPhoto.setRotation(180);*/
-                            /*if (cameraId == 0)
-                                scale = 270;
-                            else scale = 90;*/
                             orientation = PORTRAIT_DOWN;
                         }
                     }
@@ -122,15 +112,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                     if (x >= 0) {
                         if (orientation == LANDSCAPE_LEFT) {
                         } else {
-                            /*buttonPhoto.setRotation(90);*/
-                            /*scale = 0;*/
                             orientation = LANDSCAPE_LEFT;
                         }
                     } else {
                         if (orientation == LANDSCAPE_RIGHT) {
                         } else {
-                            /*buttonPhoto.setRotation(270);*/
-                            /*scale = 180;*/
                             orientation = LANDSCAPE_RIGHT;
                         }
                     }
@@ -165,16 +151,18 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     //вынести в отдельный класс
     private LayoutParams layoutParams (SurfaceView surfaceView) {
-        Camera.Size previewSize = camera.getParameters().getPreviewSize();
-        float aspect = (float) previewSize.height/previewSize.width;
+        camera.setDisplayOrientation(90);
+        Camera.Size cameraSize = camera.getParameters().getPictureSize();
+        float aspect = (float) cameraSize.height/cameraSize.width;
         int previewSurfaceWidth = surfaceView.getWidth();
-        Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
-                previewSize.width + "surface.getWidth()/surface.getWidth()" +
+        int previewSurfaceHeight = surfaceView.getHeight();
+        Log.d("myLogs", "cameraSize.height/cameraSize.width = " + cameraSize.height + " " +
+                cameraSize.width + "surface.getHeight()/surface.getWidth()" +
                 surfaceView.getHeight() + " / " + surfaceView.getWidth());
         LayoutParams lp = surfaceView.getLayoutParams();
-        camera.setDisplayOrientation(90);
         Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
         lp.height = (int) (previewSurfaceWidth / aspect);
+        lp.width = previewSurfaceWidth;
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
         return lp;
     }
@@ -185,25 +173,25 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-       /* camera.stopPreview();
+        camera.stopPreview();
         camera.release();
-        camera = null;*/
+        camera = null;
     }
 
-    @Override
+   /* @Override
     protected void onResume() {
         super.onResume();
         camera = Camera.open();
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected void onPause() {
         super.onPause();
         releaseMediaRecorder();
         if (camera != null)
             camera.release();
         camera = null;
-    }
+    }*/
 
 
     public void onClickChangeCamera(View view) {
@@ -248,9 +236,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             intent.putExtra("secret",  secret);
             intent.putExtra("filePath",videoFile.getAbsolutePath());
             intent.putExtra("dirPath", VIDEO_DIR);
-            /*UploadPicture upload = new UploadPicture(VideoActivity.this, loginClass.mDBApi,
-                      VIDEO_DIR, videoFile);
-            upload.execute();*/
             startService(intent);
         }
     }

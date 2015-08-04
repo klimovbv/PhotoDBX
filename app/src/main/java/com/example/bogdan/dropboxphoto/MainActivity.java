@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
     static final int DBX_CHOOSER_REQUEST = 0;  // You can change this if needed
 
     private Button mChooserButton;
+    private Button loginButton, photoButton, videoButton, photoListButton, videoListButton;
     /*private DbxChooser mChooser;*/
 
     @Override
@@ -41,6 +42,20 @@ public class MainActivity extends Activity {
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
+        loginButton = (Button)findViewById(R.id.dropbox_login);
+        photoButton = (Button)findViewById(R.id.upload_photo);
+        videoButton = (Button)findViewById(R.id.upload_video);
+        photoListButton = (Button)findViewById(R.id.photo_list);
+        videoListButton = (Button)findViewById(R.id.video_list);
+
+        if (loginClass.isLoggedIn) {
+            loginButton.setText("Log out");
+            photoButton.setVisibility(View.VISIBLE);
+            videoButton.setVisibility(View.VISIBLE);
+            photoListButton.setVisibility(View.VISIBLE);
+            videoListButton.setVisibility(View.VISIBLE);
+        }
+
 
         /*mChooser = new DbxChooser(APP_KEY);
 
@@ -75,6 +90,11 @@ public class MainActivity extends Activity {
                     edit.putString(ACCESS_SECRET_NAME, accessToken);
                     edit.commit();
                     loginClass.isLoggedIn = true;
+                    loginButton.setText("Log out");
+                    photoButton.setVisibility(View.VISIBLE);
+                    videoButton.setVisibility(View.VISIBLE);
+                    photoListButton.setVisibility(View.VISIBLE);
+                    videoListButton.setVisibility(View.VISIBLE);
                     return;
                 }
             } catch (IllegalStateException e) {
@@ -95,8 +115,16 @@ public class MainActivity extends Activity {
 
     public void onClickLogin(View view) {
         if (loginClass.isLoggedIn) {
-            Toast toast = Toast.makeText(this, "You have already logged in", Toast.LENGTH_LONG);
+            loginClass.mDBApi.getSession().unlink();
+            loginClass.isLoggedIn = false;
+            loginButton.setText("Log out");
+            photoButton.setVisibility(View.INVISIBLE);
+            videoButton.setVisibility(View.INVISIBLE);
+            photoListButton.setVisibility(View.INVISIBLE);
+            videoListButton.setVisibility(View.INVISIBLE);
+            Toast toast = Toast.makeText(this, "You have logged out", Toast.LENGTH_LONG);
             toast.show();
+            loginButton.setText("Login to Dropbox");
         } else {
             loginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
         }
@@ -113,21 +141,31 @@ public class MainActivity extends Activity {
     }
 
     public void onClickPhotoList(View view) {
-        Intent intent = new Intent(this, ListActivityMyAdapter.class);
-        intent.putExtra("Type", "/Photos/");
-        startActivity(intent);
+        if (loginClass.isLoggedIn) {
+            Intent intent = new Intent(this, ListActivityMyAdapter.class);
+            intent.putExtra("Type", "/Photos/");
+            startActivity(intent);
+        } else {
+            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     public void onClickVideoList(View view) {
-        Intent intent = new Intent(this, ListActivityMyAdapter.class);
-        intent.putExtra("Type", "/Video/");
-        startActivity(intent);
+        if (loginClass.isLoggedIn) {
+            Intent intent = new Intent(this, ListActivityMyAdapter.class);
+            intent.putExtra("Type", "/Video/");
+            startActivity(intent);
+        } else {
+            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
-    public void onClickManagerButton(View view) {
+    /*public void onClickManagerButton(View view) {
         Intent intent = new Intent(this, ListActivityManager.class);
         startActivity(intent);
-    }
+    }*/
 
    /* @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -144,11 +182,4 @@ public class MainActivity extends Activity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }*/
-
-    public void onPlayVideoButton(View view) {
-        Intent intent = new Intent(this, VideoPlayer.class);
-        startActivity(intent);
-    }
-
-
 }

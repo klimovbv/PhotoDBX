@@ -195,7 +195,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera.startPreview();
     }
     private LayoutParams layoutParams (SurfaceView surfaceView) {
-        Camera.Size previewSize = camera.getParameters().getPreviewSize();
+        Camera.Size previewSize = camera.getParameters().getPictureSize();
         float aspect = (float) previewSize.height/previewSize.width;
         int previewSurfaceWidth = surfaceView.getWidth();
         Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
