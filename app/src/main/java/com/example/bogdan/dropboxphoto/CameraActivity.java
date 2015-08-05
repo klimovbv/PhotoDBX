@@ -38,6 +38,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -48,6 +51,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
+    private static final String CAMERA_HEIGHT = "Camera height";
+    private static final String CAMERA_WIDTH = "Camera width";
     LoginClass loginClass = null;
 
     private static final String TAG = "myLogs";
@@ -66,6 +71,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     float x, y, z;
     boolean rotate;
     int  orientation;
+    int widthforCamera, heightForCamera;
+    ArrayList<Map<String, Integer>> cameraSizes;
+    HashMap<String, Integer> m;
+    LayoutParams firsLayoutParams;
+    int identificator;
+    int firstHeight, firstWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +89,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         holder = surface.getHolder();
         /*holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
         holder.addCallback(this);
-        cameraId = 1;
+        cameraSizes = new ArrayList<Map<String, Integer>>();
+        cameraId = 0;
+        identificator = 0;
         buttonPhoto = (Button)findViewById(R.id.button2);
         buttonChangeCamera = (Button)findViewById(R.id.button);
 
@@ -181,6 +194,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         if (camera == null) {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
+            camera.setDisplayOrientation(90);
             Log.d(TAG, "Camera opened ID = " + cameraId);
         }
         else {
@@ -191,22 +205,72 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
-        surface.setLayoutParams(layoutParams(surface));
+        LayoutParams lpr = layoutParams(surface);
+        surface.setLayoutParams(lpr);
+
+
         camera.startPreview();
     }
     private LayoutParams layoutParams (SurfaceView surfaceView) {
-        Camera.Size previewSize = camera.getParameters().getPictureSize();
-        float aspect = (float) previewSize.height/previewSize.width;
-        int previewSurfaceWidth = surfaceView.getWidth();
-        Log.d("myLogs", "previewSize.height/previewSize.width = " + previewSize.height + " " +
-                previewSize.width + "surface.getWidth()/surface.getWidth()" +
-                surfaceView.getHeight() + " / " + surfaceView.getWidth());
+
         LayoutParams lp = surfaceView.getLayoutParams();
-        camera.setDisplayOrientation(90);
-        Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
-        lp.height = (int) (previewSurfaceWidth / aspect);
+        if (identificator == 0) {
+            firstHeight = surfaceView.getHeight();
+            firstWidth = surfaceView.getWidth();
+            Log.d("myLogs", "==FIRST surface. height / width" + firstHeight + " / "
+                    + firstWidth);
+            identificator = 1;
+        } else Log.d("myLogs", "==ID = 1; FIRST surface. height / width" + firstHeight + " / "
+                + firstWidth);
+
+        Log.d("myLogs", "==lp. height / width" + lp.height + " / " + lp.width);
+
+        /*
+
+        float aspect = (float) cameraSize.height/cameraSize.width;*/
+
+        if (cameraSizes.size() == 0 || cameraSizes.size() == 1) {
+            m = new HashMap<String, Integer>();
+            Camera.Parameters parameters = camera.getParameters();
+            Camera.Size cameraSize = parameters.getPictureSize();
+            Log.d("myLogs", "cameraSize.height/cameraSize.width = " + cameraSize.height + " " +
+                    cameraSize.width + "surface.getHeight()/surface.getWidth()" +
+                    surfaceView.getHeight() + " / " + surfaceView.getWidth());
+
+            Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
+            getSizeForCamera(firstHeight, firstWidth,
+                    cameraSize.width, cameraSize.height);
+            m.put(CAMERA_HEIGHT, heightForCamera);
+            m.put(CAMERA_WIDTH, widthforCamera);
+            cameraSizes.add(m);
+
+        } else {
+            if (cameraId == 0) {
+                heightForCamera = cameraSizes.get(cameraId).get(CAMERA_HEIGHT);
+                widthforCamera = cameraSizes.get(cameraId).get(CAMERA_WIDTH);
+            } else if (cameraId == 1 ) {
+                heightForCamera = cameraSizes.get(cameraId).get(CAMERA_HEIGHT);
+                widthforCamera = cameraSizes.get(cameraId).get(CAMERA_WIDTH);
+            }
+        }
+
+        lp.height = heightForCamera;
+        lp.width = widthforCamera;
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setPreviewSize(heightForCamera, widthforCamera);
+        camera.setParameters(parameters);
+
         Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
+        Log.d("myLogs", "new  surface. height / width" + surfaceView.getHeight() + " / "
+                + surfaceView.getWidth());
         return lp;
+    }
+    private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
+                                  int cameraHeight, int cameraWidth){
+        float scale = Math.min((float) surfaceHeight / (float) cameraHeight,
+                (float) surfaceWidth / (float) cameraWidth);
+        widthforCamera = (int)((float)cameraWidth*scale);
+        heightForCamera = (int)((float)cameraHeight*scale);
     }
 
     @Override
@@ -297,7 +361,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             cameraId = 0;
         }
 
-        surfaceDestroyed(holder);
+
+        camera.stopPreview();
+        camera.release();
+        camera = null;
         surfaceCreated(holder);
     }
 
