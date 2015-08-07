@@ -43,7 +43,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private Camera camera;
     private int cameraId;
     private float x, y;
-    private int orientation, scale;
+    private int orientation, angle;
     private int widthForCamera, heightForCamera;
     private int identificator;
     private int firstHeight, firstWidth;
@@ -77,7 +77,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         cameraId = 0;
         identificator = 0;
         orientation = PORTRAIT_UP;
-        scale = 90;
+        angle = 90;
 
         /*sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         int sensorType = Sensor.TYPE_GRAVITY;
@@ -284,35 +284,35 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (cameraId == 0) {
             switch (orientation){
                 case PORTRAIT_UP:
-                    scale = 90;
+                    angle = 90;
                     break;
                 case PORTRAIT_DOWN:
-                    scale = 270;
+                    angle = 270;
                     break;
                 case LANDSCAPE_LEFT:
-                    scale = 0;
+                    angle = 0;
                     break;
                 case LANDSCAPE_RIGHT:
-                    scale = 180;
+                    angle = 180;
                     break;
             }
         }
         else
             switch (orientation) {
                 case PORTRAIT_UP:
-                    scale = 270;
+                    angle = 270;
                     break;
                 case PORTRAIT_DOWN:
-                    scale = 90;
+                    angle = 90;
                     break;
                 case LANDSCAPE_LEFT:
-                    scale = 0;
+                    angle = 0;
                     break;
                 case LANDSCAPE_RIGHT:
-                    scale = 180;
+                    angle = 180;
                     break;
         }
-        mediaRecorder.setOrientationHint(scale);
+        mediaRecorder.setOrientationHint(angle);
         try {
             mediaRecorder.prepare();
         } catch (Exception e) {
