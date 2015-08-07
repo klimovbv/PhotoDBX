@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/surfaceViewVideo"
+        android:layout_gravity="center" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_switch_video_black_24dp"
+        android:id="@+id/change_button"
+        android:layout_gravity="left|bottom"
+        android:onClick="onClickChangeCamera"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_stop_black_24dp"
+        android:id="@+id/stop_button"
+        android:layout_gravity="right|bottom"
+        android:onClick="onClickStopRecord"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_videocam_black_24dp"
+        android:id="@+id/record_button"
+        android:layout_gravity="center|bottom"
+        android:onClick="onClickVideo"/>
+</FrameLayout>

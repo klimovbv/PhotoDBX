@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="20dp"
-    android:gravity="center_horizontal"
-    android:orientation="vertical" >
+    android:layout_marginTop="20dp">
 
     <Button
         android:id="@+id/dropbox_login"
@@ -16,10 +14,42 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickLogin"/>
+        android:onClick="onClickLogin"
+        android:layout_marginBottom="10dp"
+        />
 
     <Button
-        android:id="@+id/upload_file"
+        android:id="@+id/photo_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#176CEC"
+        android:text="Show Photos"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="onClickPhotoList"
+        android:layout_below="@id/dropbox_login"
+        android:visibility="invisible"
+        />
+
+    <Button
+        android:id="@+id/video_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="#176CEC"
+        android:text="Show Video"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="onClickVideoList"
+        android:layout_below="@id/photo_list"
+        android:visibility="invisible"
+        />
+
+    <Button
+        android:id="@+id/upload_photo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -28,30 +58,25 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
         android:textStyle="bold"
-        android:onClick="onClickCameraButton"/>
+        android:onClick="onClickCameraButton"
+        android:layout_above="@+id/upload_video"
+        android:visibility="invisible"
+        android:layout_marginBottom="10dp"/>
 
-    <!--<Button
-        android:id="@+id/list_files"
+    <Button
+        android:id="@+id/upload_video"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
         android:background="#176CEC"
-        android:text="List All Files"
+        android:text="Upload Video to Dropbox"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#fff"
-        android:textStyle="bold" />-->
+        android:textStyle="bold"
+        android:onClick="onClickVideoButton"
+        android:visibility="invisible"
+        android:layout_margin="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
-    <!--<ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp" >
 
-        <LinearLayout
-            android:id="@+id/container_files"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-        </LinearLayout>
-    </ScrollView>-->
-
-</LinearLayout>
+</RelativeLayout>

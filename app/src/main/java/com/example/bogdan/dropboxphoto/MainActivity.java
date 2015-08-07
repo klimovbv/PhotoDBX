@@ -8,44 +8,67 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+/*import com.dropbox.chooser.android.DbxChooser;*/
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
+
 
 public class MainActivity extends Activity {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    private final String APP_KEY = "e7r6jtptl6t3rz9";
-    private final String APP_SECRET = "qqfvu5wtkqft9uz";
-    public static DropboxAPI<AndroidAuthSession> mDBApi;
-    private Boolean isLoggedIn;
+    private LoginClass loginClass;
+    private Button loginButton, photoButton, videoButton, photoListButton, videoListButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        AndroidAuthSession session = buildSession();
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+
+        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        String key = prefs.getString(ACCESS_KEY_NAME, null);
+        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        loginClass = new LoginClass();
+        loginClass.makingSession(key, secret);
+        loginButton = (Button)findViewById(R.id.dropbox_login);
+        photoButton = (Button)findViewById(R.id.upload_photo);
+        videoButton = (Button)findViewById(R.id.upload_video);
+        photoListButton = (Button)findViewById(R.id.photo_list);
+        videoListButton = (Button)findViewById(R.id.video_list);
+
+        if (loginClass.isLoggedIn) {
+            loginButton.setText("Log out");
+            photoButton.setVisibility(View.VISIBLE);
+            videoButton.setVisibility(View.VISIBLE);
+            photoListButton.setVisibility(View.VISIBLE);
+            videoListButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mDBApi.getSession().authenticationSuccessful()) {
+        if (loginClass.mDBApi.getSession().authenticationSuccessful()) {
             try {
-                mDBApi.getSession().finishAuthentication();
-                String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+                loginClass.mDBApi.getSession().finishAuthentication();
+                String accessToken = loginClass.mDBApi.getSession().getOAuth2AccessToken();
                 if (accessToken != null) {
                     SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
                     Editor edit = prefs.edit();
                     edit.putString(ACCESS_KEY_NAME, "oauth2:");
                     edit.putString(ACCESS_SECRET_NAME, accessToken);
                     edit.commit();
-                    isLoggedIn = true;
+                    loginClass.isLoggedIn = true;
+                    loginButton.setText("Log out");
+                    photoButton.setVisibility(View.VISIBLE);
+                    videoButton.setVisibility(View.VISIBLE);
+                    photoListButton.setVisibility(View.VISIBLE);
+                    videoListButton.setVisibility(View.VISIBLE);
                     return;
                 }
             } catch (IllegalStateException e) {
@@ -55,38 +78,41 @@ public class MainActivity extends Activity {
     }
 
     public void onClickCameraButton(View view) {
-        if (isLoggedIn) {
-            Intent intent = new Intent(this, CameraActivity.class);
-            startActivity(intent);
-        } else {
-            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
-            toast.show();
-        }
-    }
-
-    private void loadAuth(AndroidAuthSession session) {
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        if (key == null || secret == null || key.length() == 0 || secret.length() == 0) {
-            isLoggedIn = false;
-            return;
-        } else {
-            session.setOAuth2AccessToken(secret);
-            isLoggedIn = true;
-        }
-
-    }
-
-    private AndroidAuthSession buildSession() {
-        AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeyPair);
-        loadAuth(session);
-
-        return session;
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 
     public void onClickLogin(View view) {
-        mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+        if (loginClass.isLoggedIn) {
+            loginClass.mDBApi.getSession().unlink();
+            loginClass.isLoggedIn = false;
+            loginButton.setText("Log out");
+            photoButton.setVisibility(View.INVISIBLE);
+            videoButton.setVisibility(View.INVISIBLE);
+            photoListButton.setVisibility(View.INVISIBLE);
+            videoListButton.setVisibility(View.INVISIBLE);
+            Toast toast = Toast.makeText(this, "You have logged out", Toast.LENGTH_LONG);
+            toast.show();
+            loginButton.setText("Login to Dropbox");
+        } else {
+            loginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
+        }
+    }
+
+    public void onClickVideoButton(View view) {
+        Intent intent = new Intent(this, VideoActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClickPhotoList(View view) {
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Photos/");
+        startActivity(intent);
+    }
+
+    public void onClickVideoList(View view) {
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Video/");
+        startActivity(intent);
     }
 }
