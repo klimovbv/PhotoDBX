@@ -9,13 +9,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,21 +27,14 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-/**
- * Created by Bogdan on 21.07.2015.
- */
 public class MyAdapter extends BaseAdapter {
     private final Activity activity;
     private final ArrayList<String> names;
     private final DropboxAPI<AndroidAuthSession> mDBApi;
     private LayoutInflater layoutInflater;
-    private ArrayList<LoadingThumbAsync> asyncs;
     private String directory;
-
-
     public MyAdapter(Activity activity, ArrayList <String> names, DropboxAPI<AndroidAuthSession> mDBApi,
                      String directory) {
-
         super();
         this.activity = activity;
         this.names = names;
@@ -52,7 +42,7 @@ public class MyAdapter extends BaseAdapter {
         this.directory  = directory;
         layoutInflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-    static class ViewHolder {
+    private static class ViewHolder {
         public ImageView imageView;
         public TextView textView;
     }
@@ -74,7 +64,6 @@ public class MyAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        System.out.println("---------getView " + position + " " + convertView);
         ViewHolder holder;
         View rowView = convertView;
 
@@ -83,8 +72,6 @@ public class MyAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.textView = (TextView)rowView.findViewById(R.id.textViewList);
             holder.imageView = (ImageView)rowView.findViewById(R.id.imageViewList);
-
-
             rowView.setTag(holder);
         } else {
             holder = (ViewHolder)rowView.getTag();
@@ -92,12 +79,6 @@ public class MyAdapter extends BaseAdapter {
 
         holder.textView.setText(names.get(position));
         Log.d("myLogs", " int position = " + position + " fileName = " + names.get(position));
-        /*holder.imageView.setTag(position);*/
-        /*imageThumbnailLoader.DisplayImage(names.get(position), holder.imageView);*/
-
-
-
-
 
         if (cancelPotentialDownload(names.get(position), holder.imageView)){
             LoadingThumbAsync as = new LoadingThumbAsync(activity, this, holder.imageView,
@@ -106,47 +87,30 @@ public class MyAdapter extends BaseAdapter {
             holder.imageView.setImageDrawable(downloadedDrawable);
             as.execute();
         }
-
-        /*File thumbnailFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                names.get(position));
-        String thumbnailFileName = thumbnailFile.getAbsolutePath();
-        holder.imageView.setImageBitmap(BitmapFactory.decodeFile(thumbnailFileName));*/
-
         return rowView;
     }
 
     class LoadingThumbAsync extends AsyncTask<Void, Void, Bitmap> {
         private Activity activity;
         private MyAdapter myAdapter;
-        private int position;
         private String fileName;
         private ImageView imageView;
         private DropboxAPI<AndroidAuthSession> mDBApi;
         private String thumbnailFileName;
         private TextView textView;
-        private String path;
-
-        private String url;
         private final WeakReference<ImageView> imageViewWeakReference;
-
         public LoadingThumbAsync (Activity activity, MyAdapter myAdapter,
                                   ImageView imageView, String fileName,
                                   DropboxAPI<AndroidAuthSession> mDBApi, TextView textView) {
             this.activity = activity;
             this.myAdapter = myAdapter;
-
             this.fileName = fileName;
-        /*this.imageView = imageView;*/
             this.mDBApi = mDBApi;
             this.textView = textView;
-        /*this.path = imageView.getTag().toString();*/
-
-
             imageViewWeakReference = new WeakReference<ImageView>(imageView);
         }
         @Override
         protected Bitmap doInBackground(Void... params) {
-            Log.d("myLogs", " entered to ASYNC");
             File thumbnailFile;
             Bitmap bitmap = null;
             DropboxAPI.DropboxInputStream dis = null;
@@ -154,7 +118,6 @@ public class MyAdapter extends BaseAdapter {
                     fileName);
             thumbnailFileName = thumbnailFile.getAbsolutePath();
             if (!thumbnailFile.exists()) {
-                Log.d("myLogs", " !EXIST "+ thumbnailFileName);
                 try {
                     dis = mDBApi.getThumbnailStream(directory + fileName,
                             DropboxAPI.ThumbSize.ICON_256x256, DropboxAPI.ThumbFormat.JPEG);
@@ -165,10 +128,7 @@ public class MyAdapter extends BaseAdapter {
                         Log.d("myLogs", " BITMAP IS NOT NULL");
                     } else Log.d("myLogs", " BITMAP IS NULL");
                     fos.close();
-
                     dis.close();
-
-
                 } catch (DropboxException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -178,30 +138,19 @@ public class MyAdapter extends BaseAdapter {
                 Log.d("myLogs", " else in ASYNC");
                 bitmap = BitmapFactory.decodeFile(thumbnailFileName);
             }
-
             return bitmap;
         }
 
         @Override
         protected void onPostExecute(Bitmap result) {
-
-        /*if (isCancelled()){
-            result = null;
-        }*/
-
             if (imageViewWeakReference != null) {
                 ImageView imageView = imageViewWeakReference.get();
                 LoadingThumbAsync loadingThumbAsync = getBitmapDownloaderTask(imageView);
                 if (this == loadingThumbAsync) {
                     imageView.setImageBitmap(result);
                 }
-
-
             }
         }
-
-
-
     }
 
     private static LoadingThumbAsync getBitmapDownloaderTask(ImageView imageView) {
@@ -243,6 +192,4 @@ public class MyAdapter extends BaseAdapter {
         }
         return true;
     }
-
-
 }

@@ -14,16 +14,16 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/camera_2886"
+        android:drawableBottom="@drawable/camera_change"
         android:id="@+id/button"
-        android:layout_gravity="left|bottom"
+        android:layout_gravity="start|bottom"
         android:onClick="onClickChangeCamera"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/camera_2886"
+        android:drawableBottom="@drawable/camera_2886"
         android:id="@+id/button2"
-        android:layout_gravity="right|bottom"
+        android:layout_gravity="end|bottom"
         android:onClick="onClickPhoto"/>
 </FrameLayout>

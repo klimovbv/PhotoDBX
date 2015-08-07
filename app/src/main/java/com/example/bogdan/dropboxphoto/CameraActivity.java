@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -15,13 +14,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
-import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -31,7 +27,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,36 +42,29 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+    private final String PHOTO_DIR = "/Photos/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private static final String CAMERA_HEIGHT = "Camera height";
-    private static final String CAMERA_WIDTH = "Camera width";
-    LoginClass loginClass = null;
-
+    private LoginClass loginClass;
     private static final String TAG = "myLogs";
     private Camera camera;
-    File photoFile;
     private int cameraId;
-    SurfaceHolder holder;
-    SurfaceView surface;
-    Button buttonPhoto, buttonChangeCamera;
-    String fileName;
-    private final String PHOTO_DIR = "/Photos/";
-    Handler uploadHandler;
-    public String key, secret;
-    private SensorManager sensorManager;
-    private Sensor accelerometer;
-    float x, y, z;
-    boolean rotate;
-    int  orientation;
-    int widthforCamera, heightForCamera;
-    ArrayList<Map<String, Integer>> cameraSizes;
-    HashMap<String, Integer> m;
-    LayoutParams firsLayoutParams;
-    int identificator;
-    int firstHeight, firstWidth;
+    private float x, y;
+    private boolean rotate;
+    private int  orientation;
+    private int widthforCamera, heightForCamera;
+    private int identificator;
+    private int firstHeight, firstWidth;
+    private SurfaceHolder holder;
+    private SurfaceView surface;
+    private File photoFile;
+    private String fileName;
+    private Button buttonPhoto, buttonChangeCamera;
+    private String key, secret;
+    /*Handler uploadHandler;*/
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,18 +75,14 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         setContentView(R.layout.activity_camera);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
-        /*holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
         holder.addCallback(this);
-        cameraSizes = new ArrayList<Map<String, Integer>>();
         cameraId = 0;
         identificator = 0;
         buttonPhoto = (Button)findViewById(R.id.button2);
         buttonChangeCamera = (Button)findViewById(R.id.button);
-
-        uploadHandler = new DownloadHandler(this);
+        /*uploadHandler = new DownloadHandler(this);*/
         rotate = false;
         orientation = PORTRAIT_UP;
-
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
         secret = prefs.getString(ACCESS_SECRET_NAME, null);
@@ -118,7 +102,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         (getApplicationContext(), R.anim.rotation);
                 x = event.values[0];
                 y = event.values[1];
-                z = event.values[2];
+
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
@@ -136,7 +120,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                             orientation = PORTRAIT_DOWN;
                         }
                     }
-
                 } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
                         if (x >=0) {
                             if (orientation == LANDSCAPE_LEFT) {
@@ -159,7 +142,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
         }
     };
 
@@ -170,24 +152,22 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
      *        handleMessage() hook method to process Messages sent to
      *        it from the DownloadService.
      */
-    private static class DownloadHandler extends Handler {
-        /**
+ /*   private static class DownloadHandler extends Handler {
+        *//**
          * Allows Activity to be garbage collected properly.
-         */
+         *//*
         private WeakReference<CameraActivity> mActivity;
 
-        /**
+        *//**
          * Class constructor constructs mActivity as weak reference
          * to the activity
          *
          * @param activity The corresponding activity
-         */
+         *//*
         public DownloadHandler(CameraActivity activity) {
             mActivity = new WeakReference<CameraActivity>(activity);
         }
-
-
-    }
+    }*/
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -207,68 +187,29 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         }
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
-
-
         camera.startPreview();
     }
     private LayoutParams layoutParams (SurfaceView surfaceView) {
-
         LayoutParams lp = surfaceView.getLayoutParams();
         if (identificator == 0) {
             firstHeight = surfaceView.getHeight();
             firstWidth = surfaceView.getWidth();
-            Log.d("myLogs", "==FIRST surface. height / width" + firstHeight + " / "
-                    + firstWidth);
             identificator = 1;
-        } else Log.d("myLogs", "==ID = 1; FIRST surface. height / width" + firstHeight + " / "
-                + firstWidth);
-
-        Log.d("myLogs", "==lp. height / width" + lp.height + " / " + lp.width);
-
-        /*
-
-        float aspect = (float) cameraSize.height/cameraSize.width;*/
-
-        if (cameraSizes.size() == 0 || cameraSizes.size() == 1) {
-            m = new HashMap<String, Integer>();
-            Camera.Parameters parameters = camera.getParameters();
-            Camera.Size cameraSize = parameters.getPictureSize();
-            Log.d("myLogs", "cameraSize.height/cameraSize.width = " + cameraSize.height + " " +
-                    cameraSize.width + "surface.getHeight()/surface.getWidth()" +
-                    surfaceView.getHeight() + " / " + surfaceView.getWidth());
-
-            Log.d("myLogs", "lp. height / width" + lp.height + " / " + lp.width);
-            getSizeForCamera(firstHeight, firstWidth,
-                    cameraSize.width, cameraSize.height);
-            m.put(CAMERA_HEIGHT, heightForCamera);
-            m.put(CAMERA_WIDTH, widthforCamera);
-            cameraSizes.add(m);
-
-        } else {
-            if (cameraId == 0) {
-                heightForCamera = cameraSizes.get(cameraId).get(CAMERA_HEIGHT);
-                widthforCamera = cameraSizes.get(cameraId).get(CAMERA_WIDTH);
-            } else if (cameraId == 1 ) {
-                heightForCamera = cameraSizes.get(cameraId).get(CAMERA_HEIGHT);
-                widthforCamera = cameraSizes.get(cameraId).get(CAMERA_WIDTH);
-            }
         }
-
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size cameraSize = parameters.getPictureSize();
+        getSizeForCamera(firstHeight, firstWidth,
+                cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthforCamera;
-        Camera.Parameters parameters = camera.getParameters();
         parameters.setPreviewSize(heightForCamera, widthforCamera);
         camera.setParameters(parameters);
-
-        Log.d("myLogs", "new  lp. height / width" + lp.height + " / " + lp.width);
-        Log.d("myLogs", "new  surface. height / width" + surfaceView.getHeight() + " / "
-                + surfaceView.getWidth());
         return lp;
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
                                   int cameraHeight, int cameraWidth){
-        float scale = Math.min((float) surfaceHeight / (float) cameraHeight,
-                (float) surfaceWidth / (float) cameraWidth);
+        float scale = Math.min((float)surfaceHeight/(float)cameraHeight,
+                (float)surfaceWidth/(float)cameraWidth);
         widthforCamera = (int)((float)cameraWidth*scale);
         heightForCamera = (int)((float)cameraHeight*scale);
     }
@@ -285,26 +226,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void onClickPhoto(View view) {
-        Log.d("myLogs",  "ORIENTATION ==== " + x + " / " + y + " / " + z);
         int scale = 0;
         rotate = true;
         switch (orientation){
             case PORTRAIT_UP:
-                Log.d("myLogs", "PORTRAIT_UP");
                 break;
             case PORTRAIT_DOWN:
-                Log.d("myLogs", "PORTRAIT_DOWN");
                 scale = 180;
                 break;
             case LANDSCAPE_LEFT:
                 rotate = false;
-                Log.d("myLogs", "LANDSCAPE_LEFT");
                 break;
             case LANDSCAPE_RIGHT:
                 scale = 90;
-                Log.d("myLogs", "LANDSCAPE_RIGHT");
                 break;
-
         }
         takePicture(scale);
     }
@@ -336,7 +271,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                 surfaceCreated(holder);
                 try {
                    FileOutputStream outStream = new FileOutputStream(photoFile);
-                    /*outStream.write(bytes);*/
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (CameraActivity.this, UploadService.class);
@@ -360,7 +294,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
-
 
         camera.stopPreview();
         camera.release();

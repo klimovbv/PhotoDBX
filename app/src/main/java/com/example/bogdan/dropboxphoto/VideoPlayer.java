@@ -14,31 +14,23 @@ import android.os.Message;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
-import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.DropboxAPI.DropboxLink;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-
-/**
- * Created by Bogdan on 13.07.2015.
- */
 public class VideoPlayer extends Activity {
-    ProgressDialog pDialog;
-    VideoView videoView;
-    MediaController mediaController;
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    LoginClass loginClass;
-    DropboxAPI.DropboxLink fileLink;
-    String url;
-    Handler handler;
-    File file;
-    String videoUrl, videoName;
+    private ProgressDialog pDialog;
+    private VideoView videoView;
+    private MediaController mediaController;
+    private File file;
+    private String videoUrl, videoName;
+    private LoginClass loginClass;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +47,12 @@ public class VideoPlayer extends Activity {
         pDialog.setCancelable(false);
         pDialog.show();
 
-
         Thread dataThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
                 String key = prefs.getString(ACCESS_KEY_NAME, null);
                 String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-
                 loginClass.makingSession(key, secret);
 
                 file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -97,7 +87,5 @@ public class VideoPlayer extends Activity {
                 });
             }
         };
-
-
     }
 }

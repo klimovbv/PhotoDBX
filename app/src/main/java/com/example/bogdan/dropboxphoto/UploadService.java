@@ -1,19 +1,10 @@
 package com.example.bogdan.dropboxphoto;
 
-import android.app.ProgressDialog;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.ProgressListener;
 import com.dropbox.client2.exception.DropboxException;
 
 import java.io.File;
@@ -23,14 +14,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class UploadService extends Service {
-    private static final String MESSENGER = "MESSENGER";
-    private static final String FILE_NAME = "FILE_NAME";
-    String key, secret, fileName, directoryName;
-    File file;
-    LoginClass loginClass = null;
-    private final String PHOTO_DIR = "/Photos/";
+    private String key, secret, fileName, directoryName;
+    private File file;
+    private LoginClass loginClass = null;
     private DropboxAPI.UploadRequest mRequest;
-    ExecutorService es;
+    private ExecutorService es;
     //срабатывает при создании
     @Override
     public void onCreate() {
@@ -54,7 +42,6 @@ public class UploadService extends Service {
         loginClass.makingSession(key, secret);
         fileName = intent.getStringExtra("filePath");
         directoryName = intent.getStringExtra("dirPath");
-
         file = new File(fileName);
         String path = directoryName + file.getName();
         MyRun mr = new MyRun(startId, path, file);
@@ -84,13 +71,10 @@ public class UploadService extends Service {
                      mRequest.upload();
                  }
 
-             } catch (FileNotFoundException e) {
-                 e.printStackTrace();
-             }  catch (DropboxException e) {
+             } catch (FileNotFoundException | DropboxException e) {
                  e.printStackTrace();
              }
              Log.d ("myLogs", "STOPSELF RESULT with start id " + stopSelfResult(startId) + startId);
-
          }
      }
 

@@ -22,24 +22,17 @@ public class MainActivity extends Activity {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    private static final String APP_KEY = "e7r6jtptl6t3rz9";
-    private Boolean isLoggedIn = false;
-    LoginClass loginClass = null;
-    /*private DbxAccountManager mDbxAcctMgr;*/
-    static final int DBX_CHOOSER_REQUEST = 0;  // You can change this if needed
-
-    private Button mChooserButton;
+    private LoginClass loginClass;
     private Button loginButton, photoButton, videoButton, photoListButton, videoListButton;
-    /*private DbxChooser mChooser;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         String key = prefs.getString(ACCESS_KEY_NAME, null);
         String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
         loginButton = (Button)findViewById(R.id.dropbox_login);
@@ -55,26 +48,7 @@ public class MainActivity extends Activity {
             photoListButton.setVisibility(View.VISIBLE);
             videoListButton.setVisibility(View.VISIBLE);
         }
-
-
-        /*mChooser = new DbxChooser(APP_KEY);
-
-        mChooserButton = (Button) findViewById(R.id.file_manager);
-        mChooserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mChooser.forResultType(DbxChooser.ResultType.PREVIEW_LINK)
-                        .launch(MainActivity.this, DBX_CHOOSER_REQUEST);
-            }
-        });*/
-
-
-
-
-        /*mDbxAcctMgr = DbxAccountManager.getInstance(getApplicationContext(), "e7r6jtptl6t3rz9", "qqfvu5wtkqft9uz");
-        Log.d("myLogs", "Manage logged in" + mDbxAcctMgr.hasLinkedAccount());*/
     }
-
 
     @Override
     protected void onResume() {
@@ -104,13 +78,8 @@ public class MainActivity extends Activity {
     }
 
     public void onClickCameraButton(View view) {
-        if (loginClass.isLoggedIn) {
-            Intent intent = new Intent(this, CameraActivity.class);
-            startActivity(intent);
-        } else {
-            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
-            toast.show();
-        }
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 
     public void onClickLogin(View view) {
@@ -131,55 +100,19 @@ public class MainActivity extends Activity {
     }
 
     public void onClickVideoButton(View view) {
-        if (loginClass.isLoggedIn) {
-            Intent intent = new Intent(this, VideoActivity.class);
-            startActivity(intent);
-        } else {
-            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
-            toast.show();
-        }
+        Intent intent = new Intent(this, VideoActivity.class);
+        startActivity(intent);
     }
 
     public void onClickPhotoList(View view) {
-        if (loginClass.isLoggedIn) {
-            Intent intent = new Intent(this, ListActivityMyAdapter.class);
-            intent.putExtra("Type", "/Photos/");
-            startActivity(intent);
-        } else {
-            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
-            toast.show();
-        }
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Photos/");
+        startActivity(intent);
     }
 
     public void onClickVideoList(View view) {
-        if (loginClass.isLoggedIn) {
-            Intent intent = new Intent(this, ListActivityMyAdapter.class);
-            intent.putExtra("Type", "/Video/");
-            startActivity(intent);
-        } else {
-            Toast toast = Toast.makeText(this, "Please Login to Dropbox first", Toast.LENGTH_LONG);
-            toast.show();
-        }
-    }
-
-    /*public void onClickManagerButton(View view) {
-        Intent intent = new Intent(this, ListActivityManager.class);
+        Intent intent = new Intent(this, ListActivityMyAdapter.class);
+        intent.putExtra("Type", "/Video/");
         startActivity(intent);
-    }*/
-
-   /* @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == DBX_CHOOSER_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                DbxChooser.Result result = new DbxChooser.Result(data);
-                Log.d("main", "Link to selected file: " + result.getLink());
-
-                // Handle the result
-            } else {
-                // Failed or was cancelled by the user.
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }*/
+    }
 }

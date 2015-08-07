@@ -5,10 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.Matrix;
-import android.graphics.RectF;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,52 +15,42 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-
-    LoginClass loginClass = null;
-    private static final String TAG = "myLogs";
-    private Camera camera;
-    private int cameraId;
-    SurfaceHolder holder;
-    SurfaceView surface;
-    Button buttonPhoto;
-    private final String VIDEO_DIR = "/Video/";
-    MediaRecorder mediaRecorder;
-    File videoFile;
-
-    public String key, secret;
+    private static final String VIDEO_DIR = "/Video/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    float x, y, z;
-    int orientation, scale;
-    int widthforCamera, heightForCamera;
-    int identificator;
-    int firstHeight, firstWidth;
+    private String key, secret;
+    private LoginClass loginClass = null;
+    private static final String TAG = "myLogs";
+    private Camera camera;
+    private int cameraId;
+    private float x, y;
+    private int orientation, scale;
+    private int widthForCamera, heightForCamera;
+    private int identificator;
+    private int firstHeight, firstWidth;
+    private SurfaceHolder holder;
+    private SurfaceView surface;
+    private MediaRecorder mediaRecorder;
+    private File videoFile;
+    private Button buttonPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,22 +59,21 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        buttonPhoto = (Button) findViewById(R.id.button2);
         setContentView(R.layout.activity_video);
+        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        key = prefs.getString(ACCESS_KEY_NAME, null);
+        secret = prefs.getString(ACCESS_SECRET_NAME, null);
+        loginClass = new LoginClass();
+        loginClass.makingSession(key, secret);
+        buttonPhoto = (Button) findViewById(R.id.button2);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.addCallback(this);
         cameraId = 0;
         identificator = 0;
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        key = prefs.getString(ACCESS_KEY_NAME, null);
-        secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        Log.d("myLogs", key + " _  " + secret);
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
         orientation = PORTRAIT_UP;
         scale = 90;
+
         SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         int sensorType = Sensor.TYPE_GRAVITY;
         sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
@@ -100,7 +86,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 x = event.values[0];
                 y = event.values[1];
-                z = event.values[2];
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
@@ -142,28 +127,18 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
             camera.setDisplayOrientation(90);
-            /*setPreviewSize();*/
-            Log.d(TAG, "Camera opened ID = " + cameraId);
-            Log.d(TAG, "Camera size = " + camera.getParameters().getPictureSize().height
-            + " / " +camera.getParameters().getPictureSize().width);
         }
         else {
             Log.d(TAG, "camera opened");
         }
         try {
-
-            Log.d("myLogs", "====new  surface. height / width" + surface.getHeight() + " / "
-                    + surface.getWidth());
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
-
-
         camera.startPreview();
-
     }
 
     //вынести в отдельный класс
@@ -179,9 +154,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         getSizeForCamera(firstHeight, firstWidth,
                     cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
-        lp.width = widthforCamera;
+        lp.width = widthForCamera;
 
-        parameters.setPreviewSize(heightForCamera, widthforCamera);
+        parameters.setPreviewSize(heightForCamera, widthForCamera);
         camera.setParameters(parameters);
         return lp;
     }
@@ -189,10 +164,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                                   int cameraHeight, int cameraWidth){
         float scale = Math.min((float)surfaceHeight/(float)cameraHeight,
                 (float)surfaceWidth/(float)cameraWidth);
-        widthforCamera = (int)((float)cameraWidth*scale);
+        widthForCamera = (int)((float)cameraWidth*scale);
         heightForCamera = (int)((float)cameraHeight*scale);
     }
-
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
@@ -219,7 +193,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             camera.release();
         camera = null;
     }*/
-
 
     public void onClickChangeCamera(View view) {
         if (cameraId == 0) {
@@ -268,11 +241,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         }
     }
     private boolean prepareVideoRecorder() {
-
         camera.unlock();
-
         mediaRecorder = new MediaRecorder();
-
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
@@ -320,9 +290,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         }
         return true;
     }
-
-
-
 }
 
 
