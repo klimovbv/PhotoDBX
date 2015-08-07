@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -26,7 +28,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -61,8 +64,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private SurfaceView surface;
     private File photoFile;
     private String fileName;
-    private Button buttonPhoto, buttonChangeCamera;
+    private ImageButton buttonPhoto, buttonChangeCamera;
     private String key, secret;
+    private FrameLayout frameLayout;
+    FrameLayout.LayoutParams rightParams, leftParams;
     /*Handler uploadHandler;*/
 
 
@@ -73,13 +78,70 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-        surface = (SurfaceView) findViewById(R.id.surfaceView);
-        holder = surface.getHolder();
-        holder.addCallback(this);
+        frameLayout = (FrameLayout)findViewById(R.id.frameLayout);
         cameraId = 0;
         identificator = 0;
-        buttonPhoto = (Button)findViewById(R.id.button2);
-        buttonChangeCamera = (Button)findViewById(R.id.button);
+        /*buttonPhoto = (ImageButton)findViewById(R.id.button2);
+        buttonChangeCamera = (ImageButton)findViewById(R.id.button);*/
+        surface = (SurfaceView) findViewById(R.id.surfaceView);
+        buttonPhoto = new ImageButton(this);
+        buttonChangeCamera = new ImageButton(this);
+
+
+        leftParams = new FrameLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        rightParams = new FrameLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        leftParams.gravity = Gravity.BOTTOM;
+        leftParams.gravity = Gravity.LEFT;
+        rightParams.gravity = Gravity.BOTTOM;
+        rightParams.gravity = Gravity.RIGHT;
+        buttonPhoto.setBackgroundResource(R.drawable.ic_camera_alt_black_24dp);
+        buttonPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int scale = 0;
+                rotate = true;
+                switch (orientation){
+                    case PORTRAIT_UP:
+                        break;
+                    case PORTRAIT_DOWN:
+                        scale = 180;
+                        break;
+                    case LANDSCAPE_LEFT:
+                        rotate = false;
+                        break;
+                    case LANDSCAPE_RIGHT:
+                        scale = 90;
+                        break;
+                }
+                takePicture(scale);
+            }
+        });
+
+        buttonChangeCamera.setBackgroundResource(R.drawable.ic_switch_camera_black_24dp);
+        buttonChangeCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cameraId == 0) {
+                    cameraId = 1;
+                } else {
+                    cameraId = 0;
+                }
+                frameLayout.removeView(buttonPhoto);
+                frameLayout.removeView(buttonChangeCamera);
+                camera.stopPreview();
+                camera.release();
+                camera = null;
+                surfaceCreated(holder);
+            }
+        });
+
+        /*surface.setZOrderOnTop(false);*/
+
+        holder = surface.getHolder();
+        holder.setFormat(PixelFormat.TRANSPARENT);
+        holder.addCallback(this);
         /*uploadHandler = new DownloadHandler(this);*/
         rotate = false;
         orientation = PORTRAIT_UP;
@@ -94,7 +156,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
      }
-    final SensorEventListener orientationListener =new SensorEventListener() {
+    final SensorEventListener orientationListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
@@ -107,16 +169,16 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
                         } else {
-                            buttonPhoto.setRotation(0);
-                            buttonChangeCamera.setRotation(0);
+                            /*buttonPhoto.setRotation(0);
+                            buttonChangeCamera.setRotation(0);*/
                             orientation = PORTRAIT_UP;
                         }
                     }
                     else {
                         if (orientation == PORTRAIT_DOWN) {
                         } else {
-                            buttonPhoto.setRotation(180);
-                            buttonChangeCamera.setRotation(180);
+                            /*buttonPhoto.setRotation(180);
+                            buttonChangeCamera.setRotation(180);*/
                             orientation = PORTRAIT_DOWN;
                         }
                     }
@@ -124,15 +186,16 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         if (x >=0) {
                             if (orientation == LANDSCAPE_LEFT) {
                             } else {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                                orientation = LANDSCAPE_LEFT;                                                            }
+                                /*buttonPhoto.setRotation(90);
+                                buttonChangeCamera.setRotation(90);*/
+                                orientation = LANDSCAPE_LEFT;
+                            }
                         }
                         else {
                             if (orientation == LANDSCAPE_RIGHT){
                             } else {
-                                buttonPhoto.setRotation(270);
-                                buttonChangeCamera.setRotation(270);
+                                /*buttonPhoto.setRotation(270);
+                                buttonChangeCamera.setRotation(270);*/
                                 orientation = LANDSCAPE_RIGHT;
                             }
                         }
@@ -181,13 +244,41 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             Log.d(TAG, "camera opened");
         }
         try {
+
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
+
         camera.startPreview();
+        frameLayout.addView(buttonChangeCamera, rightParams);
+        frameLayout.addView(buttonPhoto, leftParams);
+        switch (orientation) {
+            case PORTRAIT_UP:
+                buttonPhoto.setRotation(0);
+                buttonChangeCamera.setRotation(0);
+                break;
+            case PORTRAIT_DOWN:
+                buttonPhoto.setRotation(0);
+                buttonChangeCamera.setRotation(0);
+                buttonPhoto.setRotation(180);
+                buttonChangeCamera.setRotation(180);
+                break;
+            case LANDSCAPE_LEFT:
+                buttonPhoto.setRotation(0);
+                buttonChangeCamera.setRotation(0);
+                buttonPhoto.setRotation(90);
+                buttonChangeCamera.setRotation(90);
+                break;
+            case LANDSCAPE_RIGHT:
+                buttonPhoto.setRotation(0);
+                buttonChangeCamera.setRotation(0);
+                buttonPhoto.setRotation(270);
+                buttonChangeCamera.setRotation(270);
+                break;
+        }
     }
     private LayoutParams layoutParams (SurfaceView surfaceView) {
         LayoutParams lp = surfaceView.getLayoutParams();

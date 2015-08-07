@@ -22,6 +22,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private SurfaceView surface;
     private MediaRecorder mediaRecorder;
     private File videoFile;
-    private Button buttonPhoto;
+    private ImageButton buttonRecord, buttonStop, buttonChangeCamera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +66,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         secret = prefs.getString(ACCESS_SECRET_NAME, null);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
-        buttonPhoto = (Button) findViewById(R.id.button2);
-        surface = (SurfaceView) findViewById(R.id.surfaceView);
+        buttonRecord = (ImageButton) findViewById(R.id.record_button);
+        buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
+        buttonStop = (ImageButton) findViewById(R.id.stop_button);
+        buttonStop.setVisibility(View.INVISIBLE);
+        surface = (SurfaceView) findViewById(R.id.surfaceViewVideo);
         holder = surface.getHolder();
         holder.addCallback(this);
         cameraId = 0;
@@ -91,11 +95,17 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         if (orientation == PORTRAIT_UP) {
                         } else {
                             orientation = PORTRAIT_UP;
+                            buttonRecord.setRotation(0);
+                            buttonStop.setRotation(0);
+                            buttonChangeCamera.setRotation(0);
                         }
                     } else {
                         if (orientation == PORTRAIT_DOWN) {
                         } else {
                             orientation = PORTRAIT_DOWN;
+                            buttonRecord.setRotation(180);
+                            buttonStop.setRotation(180);
+                            buttonChangeCamera.setRotation(180);
                         }
                     }
 
@@ -104,11 +114,17 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         if (orientation == LANDSCAPE_LEFT) {
                         } else {
                             orientation = LANDSCAPE_LEFT;
+                            buttonRecord.setRotation(90);
+                            buttonStop.setRotation(90);
+                            buttonChangeCamera.setRotation(90);
                         }
                     } else {
                         if (orientation == LANDSCAPE_RIGHT) {
                         } else {
                             orientation = LANDSCAPE_RIGHT;
+                            buttonRecord.setRotation(270);
+                            buttonStop.setRotation(270);
+                            buttonChangeCamera.setRotation(270);
                         }
                     }
                 }
@@ -152,7 +168,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size cameraSize = parameters.getPictureSize();
         getSizeForCamera(firstHeight, firstWidth,
-                    cameraSize.width, cameraSize.height);
+                cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
 
@@ -162,8 +178,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
                                   int cameraHeight, int cameraWidth){
-        float scale = Math.min((float)surfaceHeight/(float)cameraHeight,
-                (float)surfaceWidth/(float)cameraWidth);
+        float scale = Math.min((float) surfaceHeight / (float) cameraHeight,
+                (float) surfaceWidth / (float) cameraWidth);
         widthForCamera = (int)((float)cameraWidth*scale);
         heightForCamera = (int)((float)cameraHeight*scale);
     }
@@ -224,12 +240,18 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 "testvideo" + System.currentTimeMillis() + ".3gp");
         if (prepareVideoRecorder()) {
             mediaRecorder.start();
+            buttonStop.setVisibility(View.VISIBLE);
+            buttonRecord.setVisibility(View.INVISIBLE);
+            buttonChangeCamera.setVisibility(View.INVISIBLE);
         } else {
             releaseMediaRecorder();
         }
     }
     public void onClickStopRecord(View view) {
         if (mediaRecorder != null) {
+            buttonStop.setVisibility(View.INVISIBLE);
+            buttonRecord.setVisibility(View.VISIBLE);
+            buttonChangeCamera.setVisibility(View.VISIBLE);
             mediaRecorder.stop();
             releaseMediaRecorder();
             Intent intent = new Intent (VideoActivity.this, UploadService.class);
@@ -290,6 +312,24 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         }
         return true;
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        buttonStop.setVisibility(View.INVISIBLE);
+        buttonRecord.setVisibility(View.VISIBLE);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        buttonStop.setVisibility(View.INVISIBLE);
+        buttonRecord.setVisibility(View.VISIBLE);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+    }
+
+
 }
 
 

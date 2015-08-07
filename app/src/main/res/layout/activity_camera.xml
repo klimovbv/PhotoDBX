@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout
+    android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:measureAllChildren="true">
 
     <SurfaceView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/surfaceView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:drawableBottom="@drawable/camera_change"
-        android:id="@+id/button"
-        android:layout_gravity="start|bottom"
-        android:onClick="onClickChangeCamera"/>
 
-    <Button
+    <!--<ImageButton
+
+        android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableBottom="@drawable/camera_2886"
-        android:id="@+id/button2"
-        android:layout_gravity="end|bottom"
-        android:onClick="onClickPhoto"/>
+        android:src="@drawable/ic_camera_alt_black_24dp"
+        android:onClick="onClickPhoto"
+        android:layout_gravity="left|bottom" />
+
+    <ImageButton
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_switch_camera_black_24dp"
+        android:onClick="onClickChangeCamera"
+        android:layout_gravity="right|bottom" />-->
+
+
 </FrameLayout>
