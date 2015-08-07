@@ -81,22 +81,22 @@ public class MyAdapter extends BaseAdapter {
         Log.d("myLogs", " int position = " + position + " fileName = " + names.get(position));
 
         if (cancelPotentialDownload(names.get(position), holder.imageView)){
-            LoadingThumbAsync as = new LoadingThumbAsync(holder.imageView,
+            LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.imageView,
                     names.get(position), mDBApi);
-            DownloadedDrawable downloadedDrawable = new DownloadedDrawable(as);
+            DownloadedDrawable downloadedDrawable = new DownloadedDrawable(loadingThumbAsyncTask);
             holder.imageView.setImageDrawable(downloadedDrawable);
-            as.execute();
+            loadingThumbAsyncTask.execute();
         }
         return rowView;
     }
 
-    class LoadingThumbAsync extends AsyncTask<Void, Void, Bitmap> {
+    class LoadingThumbAsyncTask extends AsyncTask<Void, Void, Bitmap> {
 
         private String fileName;
         private DropboxAPI<AndroidAuthSession> mDBApi;
         private String thumbnailFileName;
         private final WeakReference<ImageView> imageViewWeakReference;
-        public LoadingThumbAsync (ImageView imageView, String fileName,
+        public LoadingThumbAsyncTask (ImageView imageView, String fileName,
                                   DropboxAPI<AndroidAuthSession> mDBApi) {
             this.fileName = fileName;
             this.mDBApi = mDBApi;
@@ -138,7 +138,7 @@ public class MyAdapter extends BaseAdapter {
         protected void onPostExecute(Bitmap result) {
             if (imageViewWeakReference != null) {
                 ImageView imageView = imageViewWeakReference.get();
-                LoadingThumbAsync loadingThumbAsync = getBitmapDownloaderTask(imageView);
+                LoadingThumbAsyncTask loadingThumbAsync = getBitmapDownloaderTask(imageView);
                 if (this == loadingThumbAsync) {
                     imageView.setImageBitmap(result);
                 }
@@ -146,7 +146,7 @@ public class MyAdapter extends BaseAdapter {
         }
     }
 
-    private static LoadingThumbAsync getBitmapDownloaderTask(ImageView imageView) {
+    private static LoadingThumbAsyncTask getBitmapDownloaderTask(ImageView imageView) {
         if (imageView != null) {
             Drawable drawable = imageView.getDrawable();
             if (drawable instanceof DownloadedDrawable) {
@@ -158,21 +158,21 @@ public class MyAdapter extends BaseAdapter {
     }
 
     static class DownloadedDrawable extends ColorDrawable {
-        private final WeakReference<LoadingThumbAsync> bitmapDownloaderTaskReference;
+        private final WeakReference<LoadingThumbAsyncTask> bitmapDownloaderTaskReference;
 
-        public DownloadedDrawable(LoadingThumbAsync bitmapDownloaderTask) {
+        public DownloadedDrawable(LoadingThumbAsyncTask bitmapDownloaderTask) {
             super(Color.WHITE);
             bitmapDownloaderTaskReference =
-                    new WeakReference<LoadingThumbAsync>(bitmapDownloaderTask);
+                    new WeakReference<LoadingThumbAsyncTask>(bitmapDownloaderTask);
         }
 
-        public LoadingThumbAsync getBitmapDownloaderTask() {
+        public LoadingThumbAsyncTask getBitmapDownloaderTask() {
             return bitmapDownloaderTaskReference.get();
         }
     }
 
     private static boolean cancelPotentialDownload(String fileName, ImageView imageView) {
-        LoadingThumbAsync bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
+        LoadingThumbAsyncTask bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
 
         if (bitmapDownloaderTask != null) {
             String bitmapUrl = bitmapDownloaderTask.fileName;
