@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import java.io.File;
@@ -37,6 +36,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
+    private static final int PREVIOUS_ORIENTATION = 5;
     private String key, secret;
     private LoginClass loginClass = null;
     private static final String TAG = "myLogs";
@@ -52,6 +52,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private MediaRecorder mediaRecorder;
     private File videoFile;
     private ImageButton buttonRecord, buttonStop, buttonChangeCamera;
+    private SensorManager sm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +79,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         orientation = PORTRAIT_UP;
         scale = 90;
 
-        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        /*sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         int sensorType = Sensor.TYPE_GRAVITY;
         sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
+                SensorManager.SENSOR_DELAY_NORMAL);*/
     }
 
     final SensorEventListener orientationListener = new SensorEventListener() {
@@ -155,6 +156,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
         camera.startPreview();
+        int sensorType = Sensor.TYPE_GRAVITY;
+        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     //вынести в отдельный класс
@@ -217,6 +222,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             cameraId = 0;
         }
 
+        sm.unregisterListener(orientationListener);
+        orientation = PREVIOUS_ORIENTATION;
+        buttonChangeCamera.setRotation(0);
+        buttonRecord.setRotation(0);
+        buttonStop.setRotation(0);
         camera.stopPreview();
         camera.release();
         camera = null;
@@ -334,21 +344,3 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
 
 
-/*
-* Camera cam = null;
-
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD){
-  Camera.CameraInfo info = new Camera.CameraInfo();
-  for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
-    Camera.getCameraInfo(i, info);
-    if (info.facing == CameraInfo.CAMERA_FACING_BACK){
-    	cam = Camera.open(i);
-    }
-  }
-  if (cam == null){
-    cam = Camera.open(0);
-  }
-}
-else {
-  camera = Camera.open();
-}*/

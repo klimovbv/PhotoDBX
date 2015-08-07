@@ -15,7 +15,6 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 

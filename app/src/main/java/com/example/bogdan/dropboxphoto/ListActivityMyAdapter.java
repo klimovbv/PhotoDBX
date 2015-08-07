@@ -107,10 +107,7 @@ public class ListActivityMyAdapter extends Activity {
         Thread dataThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                /*SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-                String key = prefs.getString(ACCESS_KEY_NAME, null);
-                String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass.makingSession(key, secret);*/
+
                 try {
                     Entry entries = loginClass.mDBApi.metadata(directory, 0, null, true, null);
                     for (Entry entry : entries.contents) {

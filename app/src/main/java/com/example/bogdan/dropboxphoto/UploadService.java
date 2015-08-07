@@ -66,7 +66,8 @@ public class UploadService extends Service {
                  Log.d("myLogs", "void run entered");
                  FileInputStream fis = new FileInputStream(file);
 
-                 mRequest = loginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(), null);
+                 mRequest = loginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(),
+                         null);
                  if (mRequest != null) {
                      mRequest.upload();
                  }
