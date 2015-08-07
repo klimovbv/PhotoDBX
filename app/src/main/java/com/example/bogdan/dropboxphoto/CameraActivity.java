@@ -195,22 +195,22 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void onClickPhoto(View view) {
-        int scale = 0;
+        int angle = 0;
         rotate = true;
         switch (orientation){
             case PORTRAIT_UP:
                 break;
             case PORTRAIT_DOWN:
-                scale = 180;
+                angle = 180;
                 break;
             case LANDSCAPE_LEFT:
                 rotate = false;
                 break;
             case LANDSCAPE_RIGHT:
-                scale = 90;
+                angle = 90;
                 break;
         }
-        takePicture(scale);
+        takePicture(angle);
     }
 
     private void takePicture(final int i) {
@@ -225,16 +225,16 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             public void onPictureTaken(byte[] bytes, Camera camera) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
                 if (rotate){
-                    int scale = 0;
+                    int angle = 0;
                     switch (cameraId){
                         case 0:
-                            scale = 90+i;
+                            angle = 90+i;
                             break;
                         case 1:
-                            scale = 270-i;
+                            angle = 270-i;
                             break;
                     }
-                    bitmap = RotateBitmap(bitmap, scale);
+                    bitmap = RotateBitmap(bitmap, angle);
                 }
                 surfaceDestroyed(holder);
                 surfaceCreated(holder);
