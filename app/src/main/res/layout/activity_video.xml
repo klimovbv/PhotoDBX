@@ -3,7 +3,8 @@
 <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/black">
 
     <SurfaceView
         android:layout_width="match_parent"
@@ -22,15 +23,6 @@
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_stop_black_24dp"
-        android:id="@+id/stop_button"
-        android:layout_gravity="right|bottom"
-        android:onClick="onClickStopRecord"/>
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_videocam_black_24dp"
         android:id="@+id/record_button"
         android:layout_gravity="center|bottom"
         android:onClick="onClickVideo"/>

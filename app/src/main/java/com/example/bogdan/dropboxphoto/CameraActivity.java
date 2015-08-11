@@ -59,6 +59,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private ImageButton buttonPhoto, buttonChangeCamera;
     private String key, secret;
     private SensorManager sm;
+    int sensorType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+        buttonPhoto.setVisibility(View.VISIBLE);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.setFormat(PixelFormat.TRANSPARENT);
@@ -83,7 +86,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Log.d ("myLogs", key + " _  " + secret);
         loginClass = new LoginClass();
         loginClass.makingSession(key, secret);
-     }
+        sensorType = Sensor.TYPE_GRAVITY;
+        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+
+    }
     final SensorEventListener orientationListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -107,20 +113,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         }
                     }
                 } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
-                        if (x >=0) {
-                            if (orientation != LANDSCAPE_LEFT) {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                                orientation = LANDSCAPE_LEFT;
-                            }
+                    if (x >=0) {
+                        if (orientation != LANDSCAPE_LEFT) {
+                            buttonPhoto.setRotation(90);
+                            buttonChangeCamera.setRotation(90);
+                            orientation = LANDSCAPE_LEFT;
                         }
-                        else {
-                            if (orientation != LANDSCAPE_RIGHT){
-                                buttonPhoto.setRotation(270);
-                                buttonChangeCamera.setRotation(270);
-                                orientation = LANDSCAPE_RIGHT;
-                            }
+                    }
+                    else {
+                        if (orientation != LANDSCAPE_RIGHT){
+                            buttonPhoto.setRotation(270);
+                            buttonChangeCamera.setRotation(270);
+                            orientation = LANDSCAPE_RIGHT;
                         }
+                    }
                 }
             }
         }
@@ -149,14 +155,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         }
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
-
         camera.startPreview();
 
-
-        int sensorType = Sensor.TYPE_GRAVITY;
-        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
     private LayoutParams layoutParams (SurfaceView surfaceView) {
         LayoutParams lp = surfaceView.getLayoutParams();
@@ -239,7 +239,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                 surfaceDestroyed(holder);
                 surfaceCreated(holder);
                 try {
-                   FileOutputStream outStream = new FileOutputStream(photoFile);
+                    FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (CameraActivity.this, UploadService.class);
@@ -264,14 +264,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             cameraId = 0;
         }
         sm.unregisterListener(orientationListener);
-        buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);
         orientation = PREVIOUS_ORIENTATION;
-
         camera.stopPreview();
         camera.release();
         camera = null;
+        buttonChangeCamera.setVisibility(View.GONE);
+        buttonPhoto.setVisibility(View.GONE);
+        buttonPhoto.setRotation(0);
+        buttonChangeCamera.setRotation(0);
         surfaceCreated(holder);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+        buttonPhoto.setVisibility(View.VISIBLE);
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -279,5 +285,28 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        sm.unregisterListener(orientationListener);
+        buttonChangeCamera.setVisibility(View.GONE);
+        buttonPhoto.setVisibility(View.GONE);
+        buttonPhoto.setRotation(0);
+        buttonChangeCamera.setRotation(0);
+        orientation = PREVIOUS_ORIENTATION;
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+        buttonPhoto.setVisibility(View.VISIBLE);
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 }
