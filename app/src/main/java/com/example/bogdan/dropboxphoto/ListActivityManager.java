@@ -51,12 +51,10 @@ public class ListActivityManager extends Activity {
             @Override
             public void run() {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-                String key = prefs.getString(ACCESS_KEY_NAME, null);
-                String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass = new LoginClass();
-                loginClass.makingSession(key, secret);
-                Log.d("myLogs", key + " _ " + secret);
-                Log.d("myLogs", "Entry");
+                if (LoginClass.isLoggedIn) {
+                    LoginClass.makingSession(prefs.getString(ACCESS_KEY_NAME, null),
+                            prefs.getString(ACCESS_SECRET_NAME, null));
+                }
                 ArrayList<Entry> files = new ArrayList<Entry>();
                 ArrayList<String> dir = new ArrayList<String>();
 

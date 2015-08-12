@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 public class UploadService extends Service {
     private String key, secret, fileName, directoryName;
     private File file;
-    private LoginClass loginClass = null;
     private DropboxAPI.UploadRequest mRequest;
     private ExecutorService es;
     //срабатывает при создании
@@ -38,8 +37,9 @@ public class UploadService extends Service {
         Log.d("myLogs", "uploadServise onStartCommand");
         key = intent.getStringExtra("key");
         secret = intent.getStringExtra("secret");
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
+        if (LoginClass.isLoggedIn) {
+            LoginClass.makingSession(key, secret);
+        }
         fileName = intent.getStringExtra("filePath");
         directoryName = intent.getStringExtra("dirPath");
         file = new File(fileName);
@@ -66,7 +66,7 @@ public class UploadService extends Service {
                  Log.d("myLogs", "void run entered");
                  FileInputStream fis = new FileInputStream(file);
 
-                 mRequest = loginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(),
+                 mRequest = LoginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(),
                          null);
                  if (mRequest != null) {
                      mRequest.upload();

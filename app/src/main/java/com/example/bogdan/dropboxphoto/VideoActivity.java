@@ -38,11 +38,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private static final int LANDSCAPE_RIGHT = 4;
     private static final int PREVIOUS_ORIENTATION = 5;
     private String key, secret;
-    private LoginClass loginClass = null;
     private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
-    private float x, y;
     private int orientation, angle;
     private int widthForCamera, heightForCamera;
     private int identificator;
@@ -51,7 +49,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private SurfaceView surface;
     private MediaRecorder mediaRecorder;
     private File videoFile;
-    private ImageButton buttonRecord, buttonStop, buttonChangeCamera;
+    private ImageButton buttonRecord, buttonChangeCamera;
     private SensorManager sm;
     private int sensorType;
     private boolean isRecord;
@@ -67,12 +65,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
         secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
+        if (!LoginClass.isLoggedIn) {
+            LoginClass.makingSession(key, secret);
+        }
         buttonRecord = (ImageButton) findViewById(R.id.record_button);
         buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
-        /*buttonStop = (ImageButton) findViewById(R.id.stop_button);*/
-        /*buttonStop.setVisibility(View.INVISIBLE);*/
         surface = (SurfaceView) findViewById(R.id.surfaceViewVideo);
         holder = surface.getHolder();
         holder.addCallback(this);
@@ -89,15 +86,14 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-                x = event.values[0];
-                y = event.values[1];
+                float x = event.values[0];
+                float y = event.values[1];
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
                     if (y >= 0) {
                         if (orientation == PORTRAIT_UP) {
                         } else {
                             orientation = PORTRAIT_UP;
                             buttonRecord.setRotation(0);
-                            /*buttonStop.setRotation(0);*/
                             buttonChangeCamera.setRotation(0);
                         }
                     } else {
@@ -105,7 +101,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         } else {
                             orientation = PORTRAIT_DOWN;
                             buttonRecord.setRotation(180);
-                            /*buttonStop.setRotation(180);*/
                             buttonChangeCamera.setRotation(180);
                         }
                     }
@@ -116,7 +111,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         } else {
                             orientation = LANDSCAPE_LEFT;
                             buttonRecord.setRotation(90);
-                            /*buttonStop.setRotation(90);*/
                             buttonChangeCamera.setRotation(90);
                         }
                     } else {
@@ -124,7 +118,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         } else {
                             orientation = LANDSCAPE_RIGHT;
                             buttonRecord.setRotation(270);
-                            /*buttonStop.setRotation(270);*/
                             buttonChangeCamera.setRotation(270);
                         }
                     }
@@ -222,8 +215,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         orientation = PREVIOUS_ORIENTATION;
         buttonChangeCamera.setRotation(0);
         buttonRecord.setRotation(0);
-        /*buttonStop.setRotation(0);*/
-        /*buttonStop.setVisibility(View.INVISIBLE);*/
         buttonRecord.setVisibility(View.INVISIBLE);
         buttonChangeCamera.setVisibility(View.INVISIBLE);
         camera.stopPreview();
@@ -270,7 +261,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
     public void onClickStopRecord() {
         if (mediaRecorder != null) {
-            /*buttonStop.setVisibility(View.INVISIBLE);*/
             buttonRecord.setVisibility(View.VISIBLE);
             buttonChangeCamera.setVisibility(View.VISIBLE);
             mediaRecorder.stop();
@@ -344,12 +334,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     protected void onStop() {
         super.onStop();
         sm.unregisterListener(orientationListener);
-        /*buttonStop.setVisibility(View.INVISIBLE);*/
         buttonRecord.setVisibility(View.INVISIBLE);
         buttonChangeCamera.setVisibility(View.INVISIBLE);
         buttonChangeCamera.setRotation(0);
         buttonRecord.setRotation(0);
-        /*buttonStop.setRotation(0);*/
         orientation = PREVIOUS_ORIENTATION;
         if (mediaRecorder != null) {
             mediaRecorder.stop();
@@ -367,13 +355,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     protected void onResume() {
         super.onResume();
         isRecord = false;
-        /*buttonStop.setVisibility(View.INVISIBLE);*/
         buttonRecord.setVisibility(View.VISIBLE);
         buttonRecord.setImageResource(R.drawable.ic_videocam_black_24dp);
         buttonChangeCamera.setVisibility(View.VISIBLE);
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
-
     }
 }
 

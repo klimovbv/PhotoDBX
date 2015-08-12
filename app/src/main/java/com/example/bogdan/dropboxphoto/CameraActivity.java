@@ -42,11 +42,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
     private static final int PREVIOUS_ORIENTATION = 5;
-    private LoginClass loginClass;
     private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
-    private float x, y;
     private boolean rotate;
     private int  orientation;
     private int widthForCamera, heightForCamera;
@@ -83,9 +81,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
         secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        Log.d ("myLogs", key + " _  " + secret);
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
+        if (!LoginClass.isLoggedIn) {
+            LoginClass.makingSession(key, secret);
+        }
         sensorType = Sensor.TYPE_GRAVITY;
         sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 
@@ -94,8 +92,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-                x = event.values[0];
-                y = event.values[1];
+                float x = event.values[0];
+                float y = event.values[1];
 
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
                     if (y >= 0) {
@@ -296,8 +294,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         buttonPhoto.setRotation(0);
         buttonChangeCamera.setRotation(0);
         orientation = PREVIOUS_ORIENTATION;
-
-
     }
 
     @Override
