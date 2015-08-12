@@ -87,7 +87,6 @@ public class ListActivityMyAdapter extends Activity {
                 if (directory.equals("/Photos/")) {
                     intent = new Intent(getApplicationContext(), PreviewImageActivity.class);
                 } else {
-                    if (directory.equals("/Video/")) ;
                     intent = new Intent(getApplicationContext(), VideoPlayer.class);
                 }
                 TextView v = (TextView) view.findViewById(R.id.textViewList);

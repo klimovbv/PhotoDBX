@@ -262,7 +262,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     public void onClickStopRecord() {
         if (mediaRecorder != null) {
             buttonRecord.setVisibility(View.VISIBLE);
-            buttonChangeCamera.setVisibility(View.VISIBLE);
+            if (Camera.getNumberOfCameras() > 1) {
+                buttonChangeCamera.setVisibility(View.VISIBLE);
+            }
             mediaRecorder.stop();
             releaseMediaRecorder();
             Intent intent = new Intent (VideoActivity.this, UploadService.class);
@@ -357,7 +359,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         isRecord = false;
         buttonRecord.setVisibility(View.VISIBLE);
         buttonRecord.setImageResource(R.drawable.ic_videocam_black_24dp);
-        buttonChangeCamera.setVisibility(View.VISIBLE);
+        if (Camera.getNumberOfCameras() > 1) {
+            buttonChangeCamera.setVisibility(View.VISIBLE);
+        }
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }

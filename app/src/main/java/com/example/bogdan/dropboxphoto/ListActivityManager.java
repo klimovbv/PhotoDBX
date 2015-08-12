@@ -19,8 +19,6 @@ public class ListActivityManager extends Activity {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    private ListView lv;
-    private LoginClass loginClass;
     private Handler handler;
 
     @Override
@@ -30,7 +28,7 @@ public class ListActivityManager extends Activity {
         final ArrayList<String> fileUIArrayList = new ArrayList<String>();
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 R.layout.list_item, fileUIArrayList);
-        lv = (ListView) findViewById(R.id.listView);
+        ListView lv = (ListView) findViewById(R.id.listView);
         lv.setAdapter(adapter);
 
         handler = new Handler(){
@@ -59,7 +57,7 @@ public class ListActivityManager extends Activity {
                 ArrayList<String> dir = new ArrayList<String>();
 
                 try {
-                    Entry entries = loginClass.mDBApi.metadata("/Photos/", 0, null, true, null);
+                    Entry entries = LoginClass.mDBApi.metadata("/Photos/", 0, null, true, null);
                     for (Entry entry : entries.contents) {
                         files.add(entry);
                         dir.add(entry.fileName());

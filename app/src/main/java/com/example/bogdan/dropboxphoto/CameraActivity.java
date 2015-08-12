@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -70,8 +71,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
-        buttonChangeCamera.setVisibility(View.VISIBLE);
-        buttonPhoto.setVisibility(View.VISIBLE);
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.setFormat(PixelFormat.TRANSPARENT);
@@ -299,7 +298,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onResume() {
         super.onResume();
-        buttonChangeCamera.setVisibility(View.VISIBLE);
+        if (Camera.getNumberOfCameras() > 1) {
+            buttonChangeCamera.setVisibility(View.VISIBLE);
+        }
         buttonPhoto.setVisibility(View.VISIBLE);
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);

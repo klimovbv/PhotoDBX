@@ -18,7 +18,8 @@
         android:src="@drawable/ic_switch_video_black_24dp"
         android:id="@+id/change_button"
         android:layout_gravity="left|bottom"
-        android:onClick="onClickChangeCamera"/>
+        android:onClick="onClickChangeCamera"
+        android:visibility="invisible"/>
 
     <ImageButton
         android:layout_width="wrap_content"

@@ -28,7 +28,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class MyAdapter extends BaseAdapter {
-    private final Activity activity;
     private final ArrayList<String> names;
     private final DropboxAPI<AndroidAuthSession> mDBApi;
     private LayoutInflater layoutInflater;
@@ -36,7 +35,6 @@ public class MyAdapter extends BaseAdapter {
     public MyAdapter(Activity activity, ArrayList <String> names, DropboxAPI<AndroidAuthSession> mDBApi,
                      String directory) {
         super();
-        this.activity = activity;
         this.names = names;
         this.mDBApi = mDBApi;
         this.directory  = directory;
@@ -122,9 +120,7 @@ public class MyAdapter extends BaseAdapter {
                     } else Log.d("myLogs", " BITMAP IS NULL");
                     fos.close();
                     dis.close();
-                } catch (DropboxException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (DropboxException | IOException e) {
                     e.printStackTrace();
                 }
             } else {
