@@ -46,6 +46,11 @@
             android:configChanges="keyboardHidden|orientation">
         </activity>
         <activity
+            android:name=".CameraPreviewActivity"
+            android:label="PhotoToDropBox"
+            android:configChanges="keyboardHidden|orientation">
+        </activity>
+        <activity
             android:name=".VideoActivity"
             android:label="PhotoToDropBox" >
         </activity>       
