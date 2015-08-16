@@ -58,7 +58,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private ImageButton buttonPhoto, buttonChangeCamera;
     private String key, secret;
     private SensorManager sm;
-    int sensorType;
+    private int sensorType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -260,20 +260,30 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
-        /*sm.unregisterListener(orientationListener);
-        orientation = PREVIOUS_ORIENTATION;*/
+        sm.unregisterListener(orientationListener);
+        orientation = PREVIOUS_ORIENTATION;
         camera.stopPreview();
         camera.release();
         camera = null;
-        /*buttonChangeCamera.setVisibility(View.GONE);
-        buttonPhoto.setVisibility(View.GONE);
-        buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);*/
+        buttonChangeCamera.setVisibility(View.GONE);
+        /*buttonPhoto.setVisibility(View.GONE);
+        buttonPhoto.setRotation(0);*/
+        buttonPhoto.setFocusable(true);
+
+        buttonChangeCamera.setRotation(0);
         surfaceCreated(holder);
-        /*buttonChangeCamera.setVisibility(View.VISIBLE);
-        buttonPhoto.setVisibility(View.VISIBLE);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
+        /*buttonPhoto.setVisibility(View.VISIBLE);*/
+        buttonPhoto.setFocusable(true);
+        buttonPhoto.findFocus();
+        buttonPhoto.forceLayout();
+        buttonPhoto.isFocusable();
+        buttonPhoto.isFocused();
+        buttonPhoto.isShown();
+        buttonPhoto.onScreenStateChanged(1);
+
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);*/
+                SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -287,12 +297,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStop() {
         super.onStop();
-        /*sm.unregisterListener(orientationListener);
+        sm.unregisterListener(orientationListener);
         buttonChangeCamera.setVisibility(View.GONE);
         buttonPhoto.setVisibility(View.GONE);
         buttonPhoto.setRotation(0);
         buttonChangeCamera.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;*/
+        orientation = PREVIOUS_ORIENTATION;
 
     }
 
@@ -303,8 +313,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             buttonChangeCamera.setVisibility(View.VISIBLE);
         }
         buttonPhoto.setVisibility(View.VISIBLE);
-        /*sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);*/
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
 
 
     }

@@ -1,3 +1,4 @@
+/*
 package com.example.bogdan.dropboxphoto;
 
 import android.content.Context;
@@ -10,9 +11,11 @@ import android.widget.FrameLayout;
 
 import java.io.IOException;
 
+*/
 /**
  * Created by Boss on 12.08.15.
- */
+ *//*
+
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback{
 
     int heightForCamera, widthForCamera;
@@ -77,3 +80,4 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         heightForCamera = (int)((float)cameraHeight*scale);
     }
 }
+*/

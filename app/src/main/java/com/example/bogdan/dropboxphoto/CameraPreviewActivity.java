@@ -1,3 +1,4 @@
+/*
 package com.example.bogdan.dropboxphoto;
 
 import android.app.ActionBar;
@@ -36,9 +37,11 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+*/
 /**
  * Created by Boss on 12.08.15.
- */
+ *//*
+
 public class CameraPreviewActivity extends Activity {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
@@ -85,8 +88,6 @@ public class CameraPreviewActivity extends Activity {
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
-
-
         rotate = false;
         orientation = PORTRAIT_UP;
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
@@ -95,11 +96,6 @@ public class CameraPreviewActivity extends Activity {
         if (!LoginClass.isLoggedIn) {
             LoginClass.makingSession(key, secret);
         }
-
-
-
-
-
 
         sensorType = Sensor.TYPE_GRAVITY;
         sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
@@ -222,6 +218,17 @@ public class CameraPreviewActivity extends Activity {
                 }
             }
         });
+        camera.stopPreview();
+        camera.release();
+        camera = null;
+        camera = Camera.open(cameraId);
+        camera.setDisplayOrientation(90);
+        try {
+            camera.setPreviewDisplay(cameraPreview.holder);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        camera.startPreview();
     }
 
     public void onClickChangeCamera(View view) {
@@ -230,27 +237,20 @@ public class CameraPreviewActivity extends Activity {
         } else {
             cameraId = 0;
         }
-        /*sm.unregisterListener(orientationListener);
-        orientation = PREVIOUS_ORIENTATION;*/
+        sm.unregisterListener(orientationListener);
+        orientation = PREVIOUS_ORIENTATION;
         camera.stopPreview();
         camera.release();
         camera = null;
-
-
-
-
         initializePreview();
-
-        /*buttonChangeCamera.setVisibility(View.GONE);
+        buttonChangeCamera.setVisibility(View.GONE);
         buttonPhoto.setVisibility(View.GONE);
         buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);*/
-
-        /*buttonChangeCamera.setVisibility(View.VISIBLE);
+        buttonChangeCamera.setRotation(0);
+        buttonChangeCamera.setVisibility(View.VISIBLE);
         buttonPhoto.setVisibility(View.VISIBLE);
         sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);*/
-
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -266,12 +266,12 @@ public class CameraPreviewActivity extends Activity {
         camera.stopPreview();
         camera.release();
         camera = null;
-        /*sm.unregisterListener(orientationListener);
+        sm.unregisterListener(orientationListener);
         buttonChangeCamera.setVisibility(View.GONE);
         buttonPhoto.setVisibility(View.GONE);
         buttonPhoto.setRotation(0);
         buttonChangeCamera.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;*/
+        orientation = PREVIOUS_ORIENTATION;
 
     }
 
@@ -303,7 +303,9 @@ public class CameraPreviewActivity extends Activity {
         if (cameraPreview != null) {
             frameLayout.removeView(cameraPreview);
             cameraPreview = null;
-            /*frameLayout.removeView(button1);*/
+            */
+/*frameLayout.removeView(button1);*//*
+
         }
         cameraPreview = new CameraPreview(this, camera);
         RelativeLayout.LayoutParams previewParams = new RelativeLayout.LayoutParams(
@@ -311,18 +313,21 @@ public class CameraPreviewActivity extends Activity {
         previewParams.addRule(RelativeLayout.CENTER_VERTICAL|RelativeLayout.CENTER_HORIZONTAL);
         cameraPreview.setLayoutParams(previewParams);
 
-        /*FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(
+        */
+/*FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         buttonParams.gravity = Gravity.BOTTOM|Gravity.LEFT;
         button1.setLayoutParams(buttonParams);
-        button1.setImageResource(R.drawable.ic_camera_alt_black_24dp);*/
-
+        button1.setImageResource(R.drawable.ic_camera_alt_black_24dp);*//*
 
 
         frameLayout = (RelativeLayout)findViewById(R.id.frameLayout);
         frameLayout.addView(cameraPreview, 0);
-        /*frameLayout.addView(button1, 2);*/
+        */
+/*frameLayout.addView(button1, 2);*//*
+
     }
 
 }
 
+*/

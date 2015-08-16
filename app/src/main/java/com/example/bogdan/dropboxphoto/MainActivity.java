@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
     }
 
     public void onClickCameraButton(View view) {
-        Intent intent = new Intent(this, CameraPreviewActivity.class);
+        Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
 
