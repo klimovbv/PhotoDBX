@@ -136,6 +136,12 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (camera == null) {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
+            Camera.Parameters params = camera.getParameters();
+            if (params.getSupportedFocusModes().contains(
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                camera.setParameters(params);
+            }
             camera.setDisplayOrientation(90);
         }
         else {

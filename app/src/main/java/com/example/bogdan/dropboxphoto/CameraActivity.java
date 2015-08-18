@@ -138,6 +138,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         if (camera == null) {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
+            Camera.Parameters params = camera.getParameters();
+            if (params.getSupportedFocusModes().contains(
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                camera.setParameters(params);
+            }
             camera.setDisplayOrientation(90);
             Log.d(TAG, "Camera opened ID = " + cameraId);
         }
@@ -266,14 +272,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         camera.release();
         camera = null;
         buttonChangeCamera.setVisibility(View.GONE);
-        /*buttonPhoto.setVisibility(View.GONE);
-        buttonPhoto.setRotation(0);*/
-        buttonPhoto.setFocusable(true);
-
+        buttonPhoto.setVisibility(View.GONE);
+        buttonPhoto.setRotation(0);
         buttonChangeCamera.setRotation(0);
         surfaceCreated(holder);
         buttonChangeCamera.setVisibility(View.VISIBLE);
-        /*buttonPhoto.setVisibility(View.VISIBLE);*/
+        buttonPhoto.setVisibility(View.VISIBLE);
         buttonPhoto.setFocusable(true);
         buttonPhoto.findFocus();
         buttonPhoto.forceLayout();
