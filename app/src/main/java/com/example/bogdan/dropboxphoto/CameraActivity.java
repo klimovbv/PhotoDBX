@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -26,6 +27,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,6 +74,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
+        if (Camera.getNumberOfCameras() < 2) {
+            buttonChangeCamera.setVisibility(View.INVISIBLE);
+        }
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.setFormat(PixelFormat.TRANSPARENT);
@@ -85,7 +91,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         }
         sensorType = Sensor.TYPE_GRAVITY;
         sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
+        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
     final SensorEventListener orientationListener = new SensorEventListener() {
         @Override
@@ -145,13 +152,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                 camera.setParameters(params);
             }
             camera.setDisplayOrientation(90);
-            Log.d(TAG, "Camera opened ID = " + cameraId);
-        }
-        else {
-            Log.d(TAG, "camera opened");
         }
         try {
-
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
@@ -159,8 +161,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
         camera.startPreview();
-
     }
+
     private LayoutParams layoutParams (SurfaceView surfaceView) {
         LayoutParams lp = surfaceView.getLayoutParams();
         if (identificator == 0) {
@@ -266,29 +268,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
-        sm.unregisterListener(orientationListener);
-        orientation = PREVIOUS_ORIENTATION;
         camera.stopPreview();
         camera.release();
         camera = null;
-        buttonChangeCamera.setVisibility(View.GONE);
-        buttonPhoto.setVisibility(View.GONE);
-        buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);
         surfaceCreated(holder);
-        buttonChangeCamera.setVisibility(View.VISIBLE);
-        buttonPhoto.setVisibility(View.VISIBLE);
-        buttonPhoto.setFocusable(true);
-        buttonPhoto.findFocus();
-        buttonPhoto.forceLayout();
-        buttonPhoto.isFocusable();
-        buttonPhoto.isFocused();
-        buttonPhoto.isShown();
-        buttonPhoto.onScreenStateChanged(1);
-
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
-
     }
 
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -301,32 +284,15 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStop() {
         super.onStop();
-        sm.unregisterListener(orientationListener);
-        buttonChangeCamera.setVisibility(View.GONE);
-        buttonPhoto.setVisibility(View.GONE);
-        buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (Camera.getNumberOfCameras() > 1) {
-            buttonChangeCamera.setVisibility(View.VISIBLE);
-        }
-        buttonPhoto.setVisibility(View.VISIBLE);
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
-
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
     }
-
 }

@@ -4,13 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/black">
+    android:background="@color/black"
+    android:measureAllChildren="true">
 
     <SurfaceView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/surfaceViewVideo"
+        android:layout_gravity="center"
+        />
+
+    <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/surfaceViewVideo"
-        android:layout_gravity="center" />
+        android:id="@+id/view_for_help"
+        android:layout_gravity="center"
+        />
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -19,12 +28,15 @@
         android:id="@+id/change_button"
         android:layout_gravity="left|bottom"
         android:onClick="onClickChangeCamera"
-        android:visibility="invisible"/>
+        android:visibility="invisible"
+        />
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/record_button"
         android:layout_gravity="center|bottom"
-        android:onClick="onClickVideo"/>
+        android:onClick="onClickVideo"
+        />
+
 </FrameLayout>

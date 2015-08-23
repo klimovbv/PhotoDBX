@@ -41,15 +41,12 @@
             </intent-filter>
         </activity>
         <activity
+
             android:name=".CameraActivity"
-            android:label="PhotoToDropBox"
-            android:configChanges="keyboardHidden|orientation">
+            android:label="PhotoToDropBox" >
         </activity>
-        <activity
-            android:name=".CameraPreviewActivity"
-            android:label="PhotoToDropBox"
-            android:configChanges="keyboardHidden|orientation">
-        </activity>
+
+
         <activity
             android:name=".VideoActivity"
             android:label="PhotoToDropBox" >

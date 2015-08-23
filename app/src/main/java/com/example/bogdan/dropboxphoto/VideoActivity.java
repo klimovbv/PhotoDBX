@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -50,17 +51,14 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private MediaRecorder mediaRecorder;
     private File videoFile;
     private ImageButton buttonRecord, buttonChangeCamera;
-    private SensorManager sm;
-    private int sensorType;
     private boolean isRecord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_video);
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
@@ -73,13 +71,15 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         surface = (SurfaceView) findViewById(R.id.surfaceViewVideo);
         holder = surface.getHolder();
         holder.addCallback(this);
+        holder.setFormat(PixelFormat.TRANSPARENT);
         cameraId = 0;
         identificator = 0;
         orientation = PORTRAIT_UP;
         angle = 90;
-        sensorType = Sensor.TYPE_GRAVITY;
-        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
+        int sensorType = Sensor.TYPE_GRAVITY;
+        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     final SensorEventListener orientationListener = new SensorEventListener() {
@@ -148,12 +148,13 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             Log.d(TAG, "camera opened");
         }
         try {
+            LayoutParams lpr = layoutParams(surface);
+            surface.setLayoutParams(lpr);
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
-        LayoutParams lpr = layoutParams(surface);
-        surface.setLayoutParams(lpr);
+
         camera.startPreview();
     }
 
@@ -171,7 +172,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
-
         parameters.setPreviewSize(heightForCamera, widthForCamera);
         camera.setParameters(parameters);
         return lp;
@@ -216,21 +216,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
-
-        sm.unregisterListener(orientationListener);
-        orientation = PREVIOUS_ORIENTATION;
-        buttonChangeCamera.setRotation(0);
-        buttonRecord.setRotation(0);
-        buttonRecord.setVisibility(View.INVISIBLE);
-        buttonChangeCamera.setVisibility(View.INVISIBLE);
         camera.stopPreview();
         camera.release();
         camera = null;
         surfaceCreated(holder);
-        buttonRecord.setVisibility(View.VISIBLE);
-        buttonChangeCamera.setVisibility(View.VISIBLE);
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
        private void releaseMediaRecorder() {
@@ -255,10 +244,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                     "testvideo" + System.currentTimeMillis() + ".3gp");
             if (prepareVideoRecorder()) {
                 mediaRecorder.start();
-                /*buttonStop.setVisibility(View.VISIBLE);*/
                 buttonRecord.setImageResource(R.drawable.ic_stop_black_24dp);
                 isRecord = true;
-                /*buttonRecord.setVisibility(View.INVISIBLE);*/
                 buttonChangeCamera.setVisibility(View.INVISIBLE);
             } else {
                 releaseMediaRecorder();
@@ -286,10 +273,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
         mediaRecorder.setProfile(CamcorderProfile
                 .get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
+        mediaRecorder.setVideoSize(heightForCamera, widthForCamera);
         if (cameraId == 0) {
             switch (orientation){
                 case PORTRAIT_UP:
@@ -335,18 +323,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onPause() {
         super.onPause();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        sm.unregisterListener(orientationListener);
-        buttonRecord.setVisibility(View.INVISIBLE);
-        buttonChangeCamera.setVisibility(View.INVISIBLE);
-        buttonChangeCamera.setRotation(0);
-        buttonRecord.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;
         if (mediaRecorder != null) {
             mediaRecorder.stop();
             releaseMediaRecorder();
@@ -360,16 +336,24 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        /*sm.unregisterListener(orientationListener);
+        buttonRecord.setVisibility(View.INVISIBLE);
+        buttonChangeCamera.setVisibility(View.INVISIBLE);
+        buttonChangeCamera.setRotation(0);
+        buttonRecord.setRotation(0);
+        orientation = PREVIOUS_ORIENTATION;*/
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         isRecord = false;
-        buttonRecord.setVisibility(View.VISIBLE);
         buttonRecord.setImageResource(R.drawable.ic_videocam_black_24dp);
         if (Camera.getNumberOfCameras() > 1) {
             buttonChangeCamera.setVisibility(View.VISIBLE);
         }
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
 }
 
