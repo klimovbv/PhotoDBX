@@ -167,7 +167,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             identificator = 1;
         }
         Camera.Parameters parameters = camera.getParameters();
-        Camera.Size cameraSize = parameters.getPictureSize();
+        Camera.Size cameraSize = parameters.getPreviewSize();
         getSizeForCamera(firstHeight, firstWidth,
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;

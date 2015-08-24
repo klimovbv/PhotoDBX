@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -70,7 +71,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-        cameraId = 0;
+        cameraId = 1;
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
@@ -171,7 +172,14 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             identificator = 1;
         }
         Camera.Parameters parameters = camera.getParameters();
-        Camera.Size cameraSize = parameters.getPictureSize();
+        List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
+        Camera.Size cameraSize;
+        if (sizes.size() != 0) {
+            cameraSize = sizes.get(0);
+        } else {
+            cameraSize = parameters.getPreviewSize();
+        }
+
         getSizeForCamera(firstHeight, firstWidth,
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
