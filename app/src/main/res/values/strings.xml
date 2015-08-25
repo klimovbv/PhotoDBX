@@ -2,7 +2,12 @@
 <resources>
 
     <string name="app_name">DropBoxPhoto</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="login_to_dropbox">Login to Dropbox</string>
+    <string name="logout_from_dropbox">Log out</string>
+    <string name="show_photo">Show Photos</string>
+    <string name="upload_photo">Upload Photo to Dropbox</string>
+    <string name="show_video">Show Video</string>
+    <string name="upload_video">Upload Video to Dropbox</string>
 
 </resources>

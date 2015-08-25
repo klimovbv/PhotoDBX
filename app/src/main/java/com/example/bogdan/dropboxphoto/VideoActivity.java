@@ -37,7 +37,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private static final int PREVIOUS_ORIENTATION = 5;
     private String key, secret;
     private static final String TAG = "myLogs";
     private Camera camera;
@@ -172,8 +171,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
-        parameters.setPreviewSize(heightForCamera, widthForCamera);
-        camera.setParameters(parameters);
+        /*parameters.setPreviewSize(heightForCamera, widthForCamera);
+        camera.setParameters(parameters);*/
         return lp;
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
@@ -338,12 +337,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStop() {
         super.onStop();
-        /*sm.unregisterListener(orientationListener);
-        buttonRecord.setVisibility(View.INVISIBLE);
-        buttonChangeCamera.setVisibility(View.INVISIBLE);
-        buttonChangeCamera.setRotation(0);
-        buttonRecord.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;*/
     }
 
     @Override

@@ -46,7 +46,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private static final int PREVIOUS_ORIENTATION = 5;
     private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
@@ -61,8 +60,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private String fileName;
     private ImageButton buttonPhoto, buttonChangeCamera;
     private String key, secret;
-    private SensorManager sm;
-    private int sensorType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +87,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         if (!LoginClass.isLoggedIn) {
             LoginClass.makingSession(key, secret);
         }
-        sensorType = Sensor.TYPE_GRAVITY;
-        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
+        int sensorType = Sensor.TYPE_GRAVITY;
+        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
     final SensorEventListener orientationListener = new SensorEventListener() {
@@ -172,20 +169,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             identificator = 1;
         }
         Camera.Parameters parameters = camera.getParameters();
-        List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
-        Camera.Size cameraSize;
-        if (sizes.size() != 0) {
-            cameraSize = sizes.get(0);
-        } else {
-            cameraSize = parameters.getPreviewSize();
-        }
-
+        Camera.Size cameraSize = parameters.getPreviewSize();
         getSizeForCamera(firstHeight, firstWidth,
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
-        parameters.setPreviewSize(heightForCamera, widthForCamera);
-        camera.setParameters(parameters);
+        /*parameters.setPreviewSize(cameraSize.width, cameraSize.height);
+        camera.setParameters(parameters);*/
         return lp;
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,

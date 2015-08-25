@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
         videoListButton = (Button)findViewById(R.id.video_list);
 
         if (LoginClass.isLoggedIn) {
-            loginButton.setText("Log out");
+            loginButton.setText(R.string.logout_from_dropbox);
             photoButton.setVisibility(View.VISIBLE);
             videoButton.setVisibility(View.VISIBLE);
             photoListButton.setVisibility(View.VISIBLE);
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
                     prefs.edit().putString(ACCESS_KEY_NAME, "oauth2:").apply();
                     prefs.edit().putString(ACCESS_SECRET_NAME, accessToken).apply();
                     LoginClass.isLoggedIn = true;
-                    loginButton.setText("Log out");
+                    loginButton.setText(R.string.logout_from_dropbox);
                     photoButton.setVisibility(View.VISIBLE);
                     videoButton.setVisibility(View.VISIBLE);
                     photoListButton.setVisibility(View.VISIBLE);
@@ -84,14 +84,14 @@ public class MainActivity extends Activity {
             prefs.edit().clear().apply();
             LoginClass.mDBApi.getSession().unlink();
             LoginClass.isLoggedIn = false;
-            loginButton.setText("Log out");
+            loginButton.setText(R.string.logout_from_dropbox);
             photoButton.setVisibility(View.INVISIBLE);
             videoButton.setVisibility(View.INVISIBLE);
             photoListButton.setVisibility(View.INVISIBLE);
             videoListButton.setVisibility(View.INVISIBLE);
             Toast toast = Toast.makeText(this, "You have logged out", Toast.LENGTH_LONG);
             toast.show();
-            loginButton.setText("Login to Dropbox");
+            loginButton.setText(R.string.login_to_dropbox);
         } else {
             LoginClass.mDBApi.getSession().startOAuth2Authentication(MainActivity.this);
         }
