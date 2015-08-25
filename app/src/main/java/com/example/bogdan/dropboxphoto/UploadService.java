@@ -14,47 +14,40 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class UploadService extends Service {
-    private String key, secret, fileName, directoryName;
-    private File file;
-    private LoginClass loginClass = null;
-    private DropboxAPI.UploadRequest mRequest;
-    private ExecutorService es;
-    //срабатывает при создании
+    private ExecutorService executorPool;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        es = Executors.newFixedThreadPool(1);
+        executorPool = Executors.newFixedThreadPool(1);
     }
 
-    //срабатывает при уничтожении
     @Override
     public void onDestroy() {
         super.onDestroy();
     }
 
-    //срабатывает когда сервис запущен при помощи startService
     @Override
     public int onStartCommand(Intent intent, int flags, final int startId) {
-        Log.d("myLogs", "uploadServise onStartCommand");
-        key = intent.getStringExtra("key");
-        secret = intent.getStringExtra("secret");
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
-        fileName = intent.getStringExtra("filePath");
-        directoryName = intent.getStringExtra("dirPath");
-        file = new File(fileName);
+        String key = intent.getStringExtra("key");
+        String secret = intent.getStringExtra("secret");
+        if (LoginClass.isLoggedIn) {
+            LoginClass.makingSession(key, secret);
+        }
+        String fileName = intent.getStringExtra("filePath");
+        String directoryName = intent.getStringExtra("dirPath");
+        File file = new File(fileName);
         String path = directoryName + file.getName();
-        MyRun mr = new MyRun(startId, path, file);
-        new Thread(mr).start();
-
-        return START_REDELIVER_INTENT;//сервис будет восстановлен после уничтожения
+        UploadFile uploadFile = new UploadFile(startId, path, file);
+        executorPool.execute(uploadFile);
+        return START_REDELIVER_INTENT;
     }
-     class MyRun implements Runnable {
+     class UploadFile implements Runnable {
          int startId;
          File file;
          String path;
 
-         public MyRun (int startId, String path, File file) {
+         public UploadFile (int startId, String path, File file) {
              this.startId = startId;
              this.file = file;
              this.path = path;
@@ -66,16 +59,18 @@ public class UploadService extends Service {
                  Log.d("myLogs", "void run entered");
                  FileInputStream fis = new FileInputStream(file);
 
-                 mRequest = loginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(),
+                 DropboxAPI.UploadRequest mRequest = LoginClass.mDBApi.putFileOverwriteRequest(path, fis, file.length(),
                          null);
                  if (mRequest != null) {
                      mRequest.upload();
                  }
+                 file.delete();
+                 stopSelfResult(startId);
 
              } catch (FileNotFoundException | DropboxException e) {
                  e.printStackTrace();
              }
-             Log.d ("myLogs", "STOPSELF RESULT with start id " + stopSelfResult(startId) + startId);
+
          }
      }
 

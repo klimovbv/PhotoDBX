@@ -22,7 +22,6 @@ public class PreviewImageActivity extends Activity {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    private LoginClass loginClass;
     private String filePath;
     private File thumbnailFile;
     private String thumbnailFileName;
@@ -48,17 +47,18 @@ public class PreviewImageActivity extends Activity {
             @Override
             public void run() {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-                String key = prefs.getString(ACCESS_KEY_NAME, null);
-                String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass.makingSession(key, secret);
-                DropboxAPI.DropboxInputStream dis = null;
+                if (!LoginClass.isLoggedIn) {
+                    LoginClass.makingSession(prefs.getString(ACCESS_KEY_NAME, null),
+                            prefs.getString(ACCESS_SECRET_NAME, null));
+                }
+                DropboxAPI.DropboxInputStream dis;
                 fileName = "testthumb" + System.currentTimeMillis() + ".jpg";
                 thumbnailFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                         fileName);
                 thumbnailFileName = thumbnailFile.getAbsolutePath();
                 Log.d("myLogs", "thumbFileName  = " + thumbnailFileName);
                 try {
-                    dis = loginClass.mDBApi.getThumbnailStream("/Photos/" + filePath,
+                    dis = LoginClass.mDBApi.getThumbnailStream("/Photos/" + filePath,
                             DropboxAPI.ThumbSize.BESTFIT_1024x768, DropboxAPI.ThumbFormat.JPEG);
                     bitmap = BitmapFactory.decodeStream(dis);
                     dis.close();

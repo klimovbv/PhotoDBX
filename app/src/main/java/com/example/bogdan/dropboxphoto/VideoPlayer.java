@@ -29,7 +29,6 @@ public class VideoPlayer extends Activity {
     private MediaController mediaController;
     private File file;
     private String videoUrl, videoName;
-    private LoginClass loginClass;
     private Handler handler;
 
     @Override
@@ -53,14 +52,14 @@ public class VideoPlayer extends Activity {
                 SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
                 String key = prefs.getString(ACCESS_KEY_NAME, null);
                 String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-                loginClass.makingSession(key, secret);
+                LoginClass.makingSession(key, secret);
 
                 file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                         "testvideo" + videoName);
                 if (!file.exists()) {
                     try {
                         FileOutputStream outputStream = new FileOutputStream(file);
-                        loginClass.mDBApi.getFile(videoUrl, null, outputStream, null);
+                        LoginClass.mDBApi.getFile(videoUrl, null, outputStream, null);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (DropboxException e) {

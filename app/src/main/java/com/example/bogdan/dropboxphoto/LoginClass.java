@@ -11,11 +11,15 @@ public class LoginClass {
 
     private static final String APP_KEY = "e7r6jtptl6t3rz9";
     private static final String APP_SECRET = "qqfvu5wtkqft9uz";
-    public static Boolean isLoggedIn;
+    public static Boolean isLoggedIn = false;
     private static String mKey;
     private static String mSecret;
 
     public static DropboxAPI<AndroidAuthSession> mDBApi;
+
+    private LoginClass () {
+
+    }
     public static void makingSession(String key, String secret) {
 
         mKey = key;

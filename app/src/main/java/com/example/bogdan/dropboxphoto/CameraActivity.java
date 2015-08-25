@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -25,11 +27,14 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -41,12 +46,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private static final int PREVIOUS_ORIENTATION = 5;
-    private LoginClass loginClass;
     private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
-    private float x, y;
     private boolean rotate;
     private int  orientation;
     private int widthForCamera, heightForCamera;
@@ -58,7 +60,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
     private String fileName;
     private ImageButton buttonPhoto, buttonChangeCamera;
     private String key, secret;
-    private SensorManager sm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +68,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
-        cameraId = 0;
+        cameraId = 1;
         identificator = 0;
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
+        if (Camera.getNumberOfCameras() < 2) {
+            buttonChangeCamera.setVisibility(View.INVISIBLE);
+        }
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.setFormat(PixelFormat.TRANSPARENT);
@@ -80,16 +84,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         key = prefs.getString(ACCESS_KEY_NAME, null);
         secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        Log.d ("myLogs", key + " _  " + secret);
-        loginClass = new LoginClass();
-        loginClass.makingSession(key, secret);
-     }
+        if (!LoginClass.isLoggedIn) {
+            LoginClass.makingSession(key, secret);
+        }
+        int sensorType = Sensor.TYPE_GRAVITY;
+        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
+                SensorManager.SENSOR_DELAY_NORMAL);
+    }
     final SensorEventListener orientationListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-                x = event.values[0];
-                y = event.values[1];
+                float x = event.values[0];
+                float y = event.values[1];
 
                 if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
                     if (y >= 0) {
@@ -107,20 +115,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                         }
                     }
                 } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
-                        if (x >=0) {
-                            if (orientation != LANDSCAPE_LEFT) {
-                                buttonPhoto.setRotation(90);
-                                buttonChangeCamera.setRotation(90);
-                                orientation = LANDSCAPE_LEFT;
-                            }
+                    if (x >=0) {
+                        if (orientation != LANDSCAPE_LEFT) {
+                            buttonPhoto.setRotation(90);
+                            buttonChangeCamera.setRotation(90);
+                            orientation = LANDSCAPE_LEFT;
                         }
-                        else {
-                            if (orientation != LANDSCAPE_RIGHT){
-                                buttonPhoto.setRotation(270);
-                                buttonChangeCamera.setRotation(270);
-                                orientation = LANDSCAPE_RIGHT;
-                            }
+                    }
+                    else {
+                        if (orientation != LANDSCAPE_RIGHT){
+                            buttonPhoto.setRotation(270);
+                            buttonChangeCamera.setRotation(270);
+                            orientation = LANDSCAPE_RIGHT;
                         }
+                    }
                 }
             }
         }
@@ -135,29 +143,24 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         if (camera == null) {
             Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
+            Camera.Parameters params = camera.getParameters();
+            if (params.getSupportedFocusModes().contains(
+                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                camera.setParameters(params);
+            }
             camera.setDisplayOrientation(90);
-            Log.d(TAG, "Camera opened ID = " + cameraId);
-        }
-        else {
-            Log.d(TAG, "camera opened");
         }
         try {
-
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
             Log.d(TAG, "IO Exception" + e);
         }
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
-
         camera.startPreview();
-
-
-        int sensorType = Sensor.TYPE_GRAVITY;
-        sm = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        sm.registerListener(orientationListener,sm.getDefaultSensor(sensorType),
-                SensorManager.SENSOR_DELAY_NORMAL);
     }
+
     private LayoutParams layoutParams (SurfaceView surfaceView) {
         LayoutParams lp = surfaceView.getLayoutParams();
         if (identificator == 0) {
@@ -166,13 +169,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
             identificator = 1;
         }
         Camera.Parameters parameters = camera.getParameters();
-        Camera.Size cameraSize = parameters.getPictureSize();
+        Camera.Size cameraSize = parameters.getPreviewSize();
         getSizeForCamera(firstHeight, firstWidth,
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
-        parameters.setPreviewSize(heightForCamera, widthForCamera);
-        camera.setParameters(parameters);
+        /*parameters.setPreviewSize(cameraSize.width, cameraSize.height);
+        camera.setParameters(parameters);*/
         return lp;
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
@@ -239,7 +242,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                 surfaceDestroyed(holder);
                 surfaceCreated(holder);
                 try {
-                   FileOutputStream outStream = new FileOutputStream(photoFile);
+                    FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (CameraActivity.this, UploadService.class);
@@ -263,11 +266,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         } else {
             cameraId = 0;
         }
-        sm.unregisterListener(orientationListener);
-        buttonPhoto.setRotation(0);
-        buttonChangeCamera.setRotation(0);
-        orientation = PREVIOUS_ORIENTATION;
-
         camera.stopPreview();
         camera.release();
         camera = null;
@@ -279,5 +277,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }

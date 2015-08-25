@@ -24,12 +24,10 @@ public class ListActivityMyAdapter extends Activity {
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
     private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-    private ListView lv;
     private  ArrayList<String> fileUIArrayList;
     private  MyAdapter adapter;
     private String itemForDelete;
     private String directory;
-    private LoginClass loginClass;
     private Handler handler;
 
     @Override
@@ -54,7 +52,7 @@ public class ListActivityMyAdapter extends Activity {
                 @Override
                 public void run() {
                     try {
-                        loginClass.mDBApi.delete(directory + itemForDelete);
+                        LoginClass.mDBApi.delete(directory + itemForDelete);
                     } catch (DropboxException e) {
                         e.printStackTrace();
                     }
@@ -71,14 +69,15 @@ public class ListActivityMyAdapter extends Activity {
         setContentView(R.layout.list_activity);
 
         SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        loginClass.makingSession(key, secret);
+        if (!LoginClass.isLoggedIn) {
+            LoginClass.makingSession(prefs.getString(ACCESS_KEY_NAME, null),
+                    prefs.getString(ACCESS_SECRET_NAME, null));
+        }
         Intent intent = getIntent();
         directory = intent.getStringExtra("Type");
         fileUIArrayList = new ArrayList<String>();
-        adapter = new MyAdapter(this, fileUIArrayList, loginClass.mDBApi, directory);
-        lv = (ListView) findViewById(R.id.listView);
+        adapter = new MyAdapter(this, fileUIArrayList, LoginClass.mDBApi, directory);
+        ListView lv = (ListView) findViewById(R.id.listView);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -86,13 +85,11 @@ public class ListActivityMyAdapter extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent;
                 if (directory.equals("/Photos/")) {
-                    intent = new Intent (getApplicationContext(), PreviewImageActivity.class);
-                }
-                else {
-                    if (directory.equals("/Video/")) ;
+                    intent = new Intent(getApplicationContext(), PreviewImageActivity.class);
+                } else {
                     intent = new Intent(getApplicationContext(), VideoPlayer.class);
                 }
-                TextView v = (TextView)view.findViewById(R.id.textViewList);
+                TextView v = (TextView) view.findViewById(R.id.textViewList);
                 intent.putExtra("filepath", v.getText().toString());
                 startActivity(intent);
             }
@@ -109,7 +106,7 @@ public class ListActivityMyAdapter extends Activity {
             public void run() {
 
                 try {
-                    Entry entries = loginClass.mDBApi.metadata(directory, 0, null, true, null);
+                    Entry entries = LoginClass.mDBApi.metadata(directory, 0, null, true, null);
                     for (Entry entry : entries.contents) {
                         fileUIArrayList.add(entry.fileName());
                     } handler.sendEmptyMessage(0);
