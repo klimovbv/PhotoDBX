@@ -24,6 +24,7 @@ import com.dropbox.client2.exception.DropboxException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -71,12 +72,11 @@ public class MyAdapter extends BaseAdapter {
             holder.textView = (TextView)rowView.findViewById(R.id.textViewList);
             holder.imageView = (ImageView)rowView.findViewById(R.id.imageViewList);
             rowView.setTag(holder);
-        } else {
-            holder = (ViewHolder)rowView.getTag();
-        }
 
+        } else {
+            holder = (ViewHolder) rowView.getTag();
+        }
         holder.textView.setText(names.get(position));
-        Log.d("myLogs", " int position = " + position + " fileName = " + names.get(position));
 
         if (cancelPotentialDownload(names.get(position), holder.imageView)){
             LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.imageView,
@@ -88,23 +88,24 @@ public class MyAdapter extends BaseAdapter {
         return rowView;
     }
 
+
     class LoadingThumbAsyncTask extends AsyncTask<Void, Void, Bitmap> {
 
         private String fileName;
         private DropboxAPI<AndroidAuthSession> mDBApi;
         private String thumbnailFileName;
-        private final WeakReference<ImageView> imageViewWeakReference;
+        private ImageView imageView;
         public LoadingThumbAsyncTask (ImageView imageView, String fileName,
                                   DropboxAPI<AndroidAuthSession> mDBApi) {
             this.fileName = fileName;
             this.mDBApi = mDBApi;
-            imageViewWeakReference = new WeakReference<ImageView>(imageView);
+            this.imageView = imageView;
         }
         @Override
         protected Bitmap doInBackground(Void... params) {
             File thumbnailFile;
             Bitmap bitmap = null;
-            DropboxAPI.DropboxInputStream dis = null;
+            DropboxAPI.DropboxInputStream dis;
             thumbnailFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                     fileName);
             thumbnailFileName = thumbnailFile.getAbsolutePath();
@@ -116,15 +117,13 @@ public class MyAdapter extends BaseAdapter {
                     bitmap = BitmapFactory.decodeStream(dis);
                     if (bitmap != null) {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                        Log.d("myLogs", " BITMAP IS NOT NULL");
-                    } else Log.d("myLogs", " BITMAP IS NULL");
+                    }
                     fos.close();
                     dis.close();
                 } catch (DropboxException | IOException e) {
                     e.printStackTrace();
                 }
             } else {
-                Log.d("myLogs", " else in ASYNC");
                 bitmap = BitmapFactory.decodeFile(thumbnailFileName);
             }
             return bitmap;
@@ -132,13 +131,10 @@ public class MyAdapter extends BaseAdapter {
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            if (imageViewWeakReference != null) {
-                ImageView imageView = imageViewWeakReference.get();
                 LoadingThumbAsyncTask loadingThumbAsync = getBitmapDownloaderTask(imageView);
                 if (this == loadingThumbAsync) {
                     imageView.setImageBitmap(result);
                 }
-            }
         }
     }
 
@@ -157,7 +153,7 @@ public class MyAdapter extends BaseAdapter {
         private final WeakReference<LoadingThumbAsyncTask> bitmapDownloaderTaskReference;
 
         public DownloadedDrawable(LoadingThumbAsyncTask bitmapDownloaderTask) {
-            super(Color.WHITE);
+            super(Color.GRAY);
             bitmapDownloaderTaskReference =
                     new WeakReference<LoadingThumbAsyncTask>(bitmapDownloaderTask);
         }
@@ -172,10 +168,10 @@ public class MyAdapter extends BaseAdapter {
 
         if (bitmapDownloaderTask != null) {
             String bitmapUrl = bitmapDownloaderTask.fileName;
-            if ((bitmapUrl == null) || (!bitmapUrl.equals(fileName))) {
+            if (!bitmapUrl.equals(fileName)) {
                 bitmapDownloaderTask.cancel(true);
             } else {
-                // The same URL is already being downloaded.
+                // The same URL is downloading in this time
                 return false;
             }
         }
