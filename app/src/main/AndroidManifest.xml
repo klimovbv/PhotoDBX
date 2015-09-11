@@ -34,7 +34,7 @@
 
             android:launchMode="singleTask" >
             <intent-filter>
-                <data android:scheme="db-e7r6jtptl6t3rz9" />
+                <data android:scheme="--------------------------" />
 
                 <action android:name="android.intent.action.VIEW" />
 
