@@ -29,10 +29,12 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class MyAdapter extends BaseAdapter {
+    private static int backgroundColor;
     private final ArrayList<String> names;
     private final DropboxAPI<AndroidAuthSession> mDBApi;
     private LayoutInflater layoutInflater;
     private String directory;
+
     public MyAdapter(Activity activity, ArrayList <String> names, DropboxAPI<AndroidAuthSession> mDBApi,
                      String directory) {
         super();
@@ -40,6 +42,7 @@ public class MyAdapter extends BaseAdapter {
         this.mDBApi = mDBApi;
         this.directory  = directory;
         layoutInflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        backgroundColor = activity.getResources().getColor(R.color.background_list_color);
     }
     private static class ViewHolder {
         public ImageView imageView;
@@ -52,7 +55,7 @@ public class MyAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public String getItem(int position) {
         return names.get(position);
     }
 
@@ -64,28 +67,31 @@ public class MyAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        View rowView = convertView;
 
-        if (rowView == null) {
-            rowView = layoutInflater.inflate(R.layout.list_item, null, true);
+        if (convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.list_item, parent, false);
             holder = new ViewHolder();
-            holder.textView = (TextView)rowView.findViewById(R.id.textViewList);
-            holder.imageView = (ImageView)rowView.findViewById(R.id.imageViewList);
-            rowView.setTag(holder);
+            holder.textView = (TextView)convertView.findViewById(R.id.textViewList);
+            holder.imageView = (ImageView)convertView.findViewById(R.id.imageViewList);
+            convertView.setTag(holder);
 
         } else {
-            holder = (ViewHolder) rowView.getTag();
+            holder = (ViewHolder) convertView.getTag();
         }
-        holder.textView.setText(names.get(position));
 
-        if (cancelPotentialDownload(names.get(position), holder.imageView)){
+
+        holder.textView.setText(getItem(position));
+        holder.imageView.setImageResource(R.drawable.ic_camera_alt_black_24dp);
+
+        if (cancelPotentialDownload(getItem(position), holder.imageView)){
             LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.imageView,
-                    names.get(position), mDBApi);
+                    getItem(position), mDBApi);
             DownloadedDrawable downloadedDrawable = new DownloadedDrawable(loadingThumbAsyncTask);
-            holder.imageView.setImageDrawable(downloadedDrawable);
+            holder.imageView.setBackground(downloadedDrawable);
+
             loadingThumbAsyncTask.execute();
         }
-        return rowView;
+        return convertView;
     }
 
 
@@ -140,7 +146,7 @@ public class MyAdapter extends BaseAdapter {
 
     private static LoadingThumbAsyncTask getBitmapDownloaderTask(ImageView imageView) {
         if (imageView != null) {
-            Drawable drawable = imageView.getDrawable();
+            Drawable drawable = imageView.getBackground();
             if (drawable instanceof DownloadedDrawable) {
                 DownloadedDrawable downloadedDrawable = (DownloadedDrawable)drawable;
                 return downloadedDrawable.getBitmapDownloaderTask();
@@ -149,11 +155,14 @@ public class MyAdapter extends BaseAdapter {
         return null;
     }
 
+
+
+
     static class DownloadedDrawable extends ColorDrawable {
         private final WeakReference<LoadingThumbAsyncTask> bitmapDownloaderTaskReference;
 
         public DownloadedDrawable(LoadingThumbAsyncTask bitmapDownloaderTask) {
-            super(Color.GRAY);
+            super(backgroundColor);
             bitmapDownloaderTaskReference =
                     new WeakReference<LoadingThumbAsyncTask>(bitmapDownloaderTask);
         }

@@ -39,20 +39,22 @@ public class ListActivityMyAdapter extends Activity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-        int position = info.position;
+        final int position = info.position;
         View view = info.targetView;
         if (item.getItemId() == DELETE_ID) {
             TextView v = (TextView)view.findViewById(R.id.textViewList);
             itemForDelete = v.getText().toString();
-            Toast.makeText(getApplicationContext(),
-                    itemForDelete + " удален.", Toast.LENGTH_SHORT).show();
             fileUIArrayList.remove(position);
             adapter.notifyDataSetChanged();
+            Toast.makeText(getApplicationContext(),
+                    itemForDelete + " удален.", Toast.LENGTH_SHORT).show();
+
             Thread deleteThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         LoginClass.mDBApi.delete(directory + itemForDelete);
+
                     } catch (DropboxException e) {
                         e.printStackTrace();
                     }
