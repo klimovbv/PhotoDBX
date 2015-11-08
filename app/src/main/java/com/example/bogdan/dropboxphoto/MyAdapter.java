@@ -81,13 +81,14 @@ public class MyAdapter extends BaseAdapter {
 
 
         holder.textView.setText(getItem(position));
-        holder.imageView.setImageResource(R.drawable.ic_camera_alt_black_24dp);
+
 
         if (cancelPotentialDownload(getItem(position), holder.imageView)){
             LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.imageView,
                     getItem(position), mDBApi);
             DownloadedDrawable downloadedDrawable = new DownloadedDrawable(loadingThumbAsyncTask);
             holder.imageView.setBackground(downloadedDrawable);
+            holder.imageView.setImageResource(R.drawable.ic_camera_alt_black_24dp);
 
             loadingThumbAsyncTask.execute();
         }

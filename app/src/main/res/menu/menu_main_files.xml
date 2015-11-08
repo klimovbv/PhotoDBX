@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_main_files_delete"
+        android:title="Delete"
+        app:showAsAction="always"
+        />
+    <group android:id="@+id/menu_main_files_singleOnlyGroup">
+        <item
+            android:title="Show"
+            android:id="@+id/menu_main_files_show"/>
+    </group>
+</menu>
