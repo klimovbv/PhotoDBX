@@ -30,6 +30,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.bogdan.dropboxphoto.services.Utils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -221,7 +223,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
         sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
         sdPath.mkdir();
         photoFile = new File(sdPath,
-                "test" + System.currentTimeMillis() + ".jpg");
+                new Utils().makeFileName(getApplicationContext()) + ".jpg");
         fileName = photoFile.getAbsolutePath();
         camera.takePicture(null, null, new PictureCallback() {
             @Override

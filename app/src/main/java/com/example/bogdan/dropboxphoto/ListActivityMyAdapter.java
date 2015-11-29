@@ -26,6 +26,7 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
+import com.example.bogdan.dropboxphoto.views.MyAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -247,7 +248,7 @@ public class ListActivityMyAdapter extends ActionBarActivity {
             startActivity(intent);
     }
 
-    private class FilesListAdapter extends MyAdapter{
+    private class FilesListAdapter extends MyAdapter {
 
         public FilesListAdapter(Activity activity, ArrayList<String> names, DropboxAPI<AndroidAuthSession> mDBApi, String directory) {
             super(activity, names, mDBApi, directory);
