@@ -15,9 +15,11 @@ import android.widget.Toast;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
+import com.example.bogdan.dropboxphoto.activities.BaseActivity;
+import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
@@ -28,9 +30,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
 
-        prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
+        setNavdrawer(new MainNavDrawer(this));
+
+        /*prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         if (!LoginClass.isLoggedIn) {
             LoginClass.makingSession(prefs.getString(ACCESS_KEY_NAME, null),
                     prefs.getString(ACCESS_SECRET_NAME, null));
@@ -112,5 +116,5 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, ListActivityMyAdapter.class);
         intent.putExtra("Type", "/Video/");
         startActivity(intent);
-    }
+    }*/
 }

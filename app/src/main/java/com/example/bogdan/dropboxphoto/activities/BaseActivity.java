@@ -1,0 +1,84 @@
+package com.example.bogdan.dropboxphoto.activities;
+
+import android.animation.Animator;
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+
+import com.example.bogdan.dropboxphoto.R;
+import com.example.bogdan.dropboxphoto.infrastructure.DbxApplication;
+import com.example.bogdan.dropboxphoto.views.NavDrawer;
+
+public class BaseActivity extends ActionBarActivity {
+    protected DbxApplication application;
+    protected Toolbar toolbar;
+    protected NavDrawer navDrawer;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        application = (DbxApplication)getApplication();
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+
+        toolbar = (Toolbar)findViewById(R.id.include_toolbar);
+        if (toolbar != null){
+            setSupportActionBar(toolbar);
+        }
+    }
+
+    protected void setNavdrawer(NavDrawer navDrawer){
+        this.navDrawer = navDrawer;
+        this.navDrawer.create();
+        overridePendingTransition(0, 0);
+
+        View rootView = findViewById(android.R.id.content);
+        rootView.setAlpha(0);
+        rootView.animate().alpha(1).setDuration(450).start();
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    public interface FadeOutListener {
+        void onFadeOutEnd();
+    }
+
+    public void fadeOut(final FadeOutListener listener) {
+        View rootView = findViewById(android.R.id.content);
+        rootView.animate()
+                .alpha(0)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        listener.onFadeOutEnd();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                })
+                .setDuration(300)
+                .start();
+    }
+
+    public DbxApplication getDbxApplication(){
+        return application;
+    }
+}

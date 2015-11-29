@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#000000</color>
     <color name="background_list_color">#FFFFFF</color>
+    <color name="list_item_nav_drawer_selected_item_background">#12000000</color>
+    <color name="list_item_nav_drawer_selected_item_text_color">#2196F3</color>
 </resources>
