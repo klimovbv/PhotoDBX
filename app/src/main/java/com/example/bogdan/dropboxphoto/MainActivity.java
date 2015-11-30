@@ -117,4 +117,5 @@ public class MainActivity extends BaseActivity {
         intent.putExtra("Type", "/Video/");
         startActivity(intent);
     }*/
+    }
 }

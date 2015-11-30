@@ -38,7 +38,6 @@ public class LoginClass {
     private static void loadAuth(AndroidAuthSession session) {
         if (mKey == null || mSecret == null || mKey.length() == 0 || mSecret.length() == 0) {
             isLoggedIn = false;
-            return;
         } else {
             session.setOAuth2AccessToken(mSecret);
             isLoggedIn = true;

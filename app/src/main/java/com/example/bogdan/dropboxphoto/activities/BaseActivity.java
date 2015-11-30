@@ -9,16 +9,23 @@ import android.view.View;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.infrastructure.DbxApplication;
 import com.example.bogdan.dropboxphoto.views.NavDrawer;
+import com.squareup.otto.Bus;
 
 public class BaseActivity extends ActionBarActivity {
+    private boolean isRegisteredWithBus;
+
     protected DbxApplication application;
     protected Toolbar toolbar;
     protected NavDrawer navDrawer;
+    protected Bus bus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         application = (DbxApplication)getApplication();
+        bus = application.getBus();
+        bus.register(this);
+        isRegisteredWithBus = true;
     }
 
     @Override
@@ -28,6 +35,25 @@ public class BaseActivity extends ActionBarActivity {
         toolbar = (Toolbar)findViewById(R.id.include_toolbar);
         if (toolbar != null){
             setSupportActionBar(toolbar);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isRegisteredWithBus){
+            bus.unregister(this);
+            isRegisteredWithBus = false;
+        }
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+
+        if(isRegisteredWithBus){
+            bus.unregister(this);
+            isRegisteredWithBus = false;
         }
     }
 
