@@ -61,12 +61,12 @@ public class NavDrawer {
     }
 
     public void setSelectedItem(NavDrawerItem item) {
-        if (selectedItem != null){
+        if (selectedItem != null) {
             selectedItem.setSelected(false);
+        }
 
         selectedItem = item;
-            selectedItem.setSelected(true);
-        }
+        selectedItem.setSelected(true);
     }
 
     public void create(){
@@ -146,8 +146,8 @@ public class NavDrawer {
         public void inflate(LayoutInflater inflater, ViewGroup navDrawerView) {
             super.inflate(inflater, navDrawerView);
 
-            if(navDrawer.activity.getClass() == targetActivity){
-                navDrawer.setSelectedItem(this);
+            if(this.navDrawer.activity.getClass() == targetActivity){
+                this.navDrawer.setSelectedItem(this);
             }
         }
 

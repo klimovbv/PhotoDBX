@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -27,8 +25,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.bogdan.dropboxphoto.services.Utils;
 
@@ -36,9 +32,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 
-public class CameraActivity extends Activity implements SurfaceHolder.Callback {
+public class Camera2Activity extends Activity implements SurfaceHolder.Callback {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
@@ -247,7 +242,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback {
                     FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
-                    Intent intent = new Intent (CameraActivity.this, UploadService.class);
+                    Intent intent = new Intent (Camera2Activity.this, UploadService.class);
                     intent.putExtra("key", key);
                     intent.putExtra("secret",  secret);
                     intent.putExtra("filePath",fileName);

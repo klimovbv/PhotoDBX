@@ -1,25 +1,17 @@
 package com.example.bogdan.dropboxphoto;
 
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-/*import com.dropbox.chooser.android.DbxChooser;*/
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.session.AppKeyPair;
-import com.example.bogdan.dropboxphoto.activities.BaseActivity;
+import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
 
+/*import com.dropbox.chooser.android.DbxChooser;*/
 
-public class MainActivity extends BaseActivity {
+
+public class MainActivity extends BaseAuthenticatedActivity {
 
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
@@ -28,11 +20,12 @@ public class MainActivity extends BaseActivity {
     SharedPreferences prefs;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onDbxAppCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         setNavdrawer(new MainNavDrawer(this));
+
 
         /*prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
         if (!LoginClass.isLoggedIn) {

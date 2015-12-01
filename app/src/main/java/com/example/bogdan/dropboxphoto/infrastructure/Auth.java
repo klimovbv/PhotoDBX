@@ -22,9 +22,6 @@ public class Auth {
     private AndroidAuthSession session;
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
-
-
-
     public Auth(Context context) {
         this.context = context;
 
@@ -41,11 +38,36 @@ public class Auth {
 
         if (authToken != null && authToken.length() != 0){
             session.setOAuth2AccessToken(authToken);
-            mDBApi= new DropboxAPI<AndroidAuthSession>(session);
         } else {
             mDBApi = null;
         }
+        mDBApi= new DropboxAPI<AndroidAuthSession>(session);
     }
+
+    public void login (){
+        mDBApi= new DropboxAPI<AndroidAuthSession>(session);
+        mDBApi.getSession().startOAuth2Authentication(context);
+    }
+
+    public DropboxAPI<AndroidAuthSession> getmDBApi() {
+        return mDBApi;
+    }
+
+    public void finishAuth(){
+        mDBApi.getSession().finishAuthentication();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(AUTH_PREFERENCES, mDBApi.getSession().getOAuth2AccessToken());
+    }
+
+
+    public boolean isLoggedIn(){
+        if (mDBApi != null){
+            return true;
+        }
+
+        return false;
+    }
+
 
     public String getAuthToken() {
         return authToken;
@@ -65,9 +87,11 @@ public class Auth {
 
     public void logout(){
         setAuthToken(null);
+        mDBApi = null;
 
         Intent loginIntent = new Intent(context, MainActivity.class);
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(loginIntent);
+
     }
 }
