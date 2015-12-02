@@ -9,7 +9,7 @@ public abstract class BaseAuthenticatedActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(!application.getAuth().isLoggedIn()){
+        if(!application.getAuth().hasAuthToken()){
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();

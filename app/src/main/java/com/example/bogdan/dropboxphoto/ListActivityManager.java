@@ -24,11 +24,11 @@ public class ListActivityManager extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list_activity);
+        setContentView(R.layout.activity_file_list);
         final ArrayList<String> fileUIArrayList = new ArrayList<String>();
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 R.layout.list_item, fileUIArrayList);
-        ListView lv = (ListView) findViewById(R.id.listView);
+        ListView lv = (ListView) findViewById(R.id.activity_file_list_listView);
         lv.setAdapter(adapter);
 
         handler = new Handler(){

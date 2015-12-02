@@ -28,20 +28,22 @@ public class Auth {
         AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
         session = new AndroidAuthSession(appKeyPair);
         preferences = context.getSharedPreferences(AUTH_PREFERENCES, Context.MODE_PRIVATE);
-
+        authToken = preferences.getString(AUTH_PREFERENCES_TOKEN, null);
         setMDBApi();
     }
 
     public void setMDBApi(){
 
-        authToken = preferences.getString(AUTH_PREFERENCES_TOKEN, null);
-
-        if (authToken != null && authToken.length() != 0){
+        if (hasAuthToken()){
             session.setOAuth2AccessToken(authToken);
-        } else {
-            mDBApi = null;
         }
+
         mDBApi= new DropboxAPI<AndroidAuthSession>(session);
+    }
+
+    public void finishAuth(){
+        mDBApi.getSession().finishAuthentication();
+        setAuthToken(mDBApi.getSession().getOAuth2AccessToken());
     }
 
     public void login (){
@@ -49,19 +51,17 @@ public class Auth {
         mDBApi.getSession().startOAuth2Authentication(context);
     }
 
+    public boolean hasAuthToken() {
+        return authToken != null && !authToken.isEmpty();
+    }
+
     public DropboxAPI<AndroidAuthSession> getmDBApi() {
         return mDBApi;
     }
 
-    public void finishAuth(){
-        mDBApi.getSession().finishAuthentication();
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(AUTH_PREFERENCES, mDBApi.getSession().getOAuth2AccessToken());
-    }
-
 
     public boolean isLoggedIn(){
-        if (mDBApi != null){
+        if (mDBApi.getSession().authenticationSuccessful()){
             return true;
         }
 
@@ -81,9 +81,6 @@ public class Auth {
         editor.commit();
     }
 
-    public boolean hasAuthToken (){
-        return authToken != null && !authToken.isEmpty();
-    }
 
     public void logout(){
         setAuthToken(null);

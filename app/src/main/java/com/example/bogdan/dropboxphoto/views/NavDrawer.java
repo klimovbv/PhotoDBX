@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
+import com.example.bogdan.dropboxphoto.activities.FileListActivity;
 
 import java.util.ArrayList;
 
@@ -137,9 +138,13 @@ public class NavDrawer {
 
     public static class ActivityNavDrawerItem extends BasicNavDrawerItem{
         public final Class targetActivity;
-        public ActivityNavDrawerItem(Class targetActivity, String text, int iconDrawable, int containerId) {
+        public final String directoryType;
+
+        public ActivityNavDrawerItem(Class targetActivity, String text, int iconDrawable, int containerId, String directoryType) {
             super(text, iconDrawable, containerId);
             this.targetActivity = targetActivity;
+            this.directoryType = directoryType;
+
         }
 
         @Override
@@ -148,7 +153,7 @@ public class NavDrawer {
 
             if(this.navDrawer.activity.getClass() == targetActivity){
                 this.navDrawer.setSelectedItem(this);
-            }
+        }
         }
 
         @Override
@@ -164,13 +169,15 @@ public class NavDrawer {
             activity.fadeOut(new BaseActivity.FadeOutListener() {
                 @Override
                 public void onFadeOutEnd() {
-                    activity.startActivity(new Intent(activity, targetActivity));
+                    Intent intent = new Intent (activity, targetActivity);
+                    if (targetActivity == FileListActivity.class){
+                        intent.putExtra("Type", directoryType);
+                    }
+                    activity.startActivity(intent);
                     activity.finish();
                 }
             });
 
         }
     }
-
-
 }

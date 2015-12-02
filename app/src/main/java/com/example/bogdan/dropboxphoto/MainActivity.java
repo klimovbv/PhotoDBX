@@ -21,7 +21,6 @@ public class MainActivity extends BaseAuthenticatedActivity {
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         setNavdrawer(new MainNavDrawer(this));

@@ -3,9 +3,10 @@ package com.example.bogdan.dropboxphoto.views;
 import android.view.View;
 
 import com.example.bogdan.dropboxphoto.Camera2Activity;
-import com.example.bogdan.dropboxphoto.MainActivity;
 import com.example.bogdan.dropboxphoto.R;
+import com.example.bogdan.dropboxphoto.VideoActivity;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
+import com.example.bogdan.dropboxphoto.activities.FileListActivity;
 
 public class MainNavDrawer extends NavDrawer {
 
@@ -13,18 +14,33 @@ public class MainNavDrawer extends NavDrawer {
         super(activity);
 
         addItem(new ActivityNavDrawerItem(
-                MainActivity.class,
-                "Inbox",
+                FileListActivity.class,
+                "Photo List",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems));
+                R.id.include_main_nav_drawer_topItems,
+                "/Photos/"));
+
+        addItem(new ActivityNavDrawerItem(
+                FileListActivity.class,
+                "Video List",
+                R.drawable.ic_launcher,
+                R.id.include_main_nav_drawer_topItems,
+                "/Video/"
+                ));
 
         addItem(new ActivityNavDrawerItem(
                 Camera2Activity.class,
-                "Camera",
+                "Make Photo",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems));
+                R.id.include_main_nav_drawer_topItems,
+                null));
 
-
+        addItem(new ActivityNavDrawerItem(
+                VideoActivity.class,
+                "Make Video",
+                R.drawable.ic_launcher,
+                R.id.include_main_nav_drawer_topItems,
+                null));
 
         addItem(new BasicNavDrawerItem(
                 "Logout",

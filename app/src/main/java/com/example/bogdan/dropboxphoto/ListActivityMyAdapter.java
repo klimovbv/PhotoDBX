@@ -2,36 +2,31 @@ package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
-
-
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
+import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
+import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
 import com.example.bogdan.dropboxphoto.views.MyAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class ListActivityMyAdapter extends ActionBarActivity {
+public class ListActivityMyAdapter extends BaseAuthenticatedActivity {
     private static final int DELETE_ID =1;
     private static final String ACCOUNT_PREFS_NAME = "prefs";
     private static final String ACCESS_KEY_NAME = "ACCES_KEY";
@@ -46,6 +41,7 @@ public class ListActivityMyAdapter extends ActionBarActivity {
 
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
+    private DropboxAPI<AndroidAuthSession> mDBApi;
 
     /*@Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -83,20 +79,21 @@ public class ListActivityMyAdapter extends ActionBarActivity {
     }*/
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.list_activity);
+    protected void onDbxAppCreate (Bundle savedInstanceState) {
+        setContentView(R.layout.activity_file_list);
 
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        if (!LoginClass.isLoggedIn) {
-            LoginClass.makingSession(prefs.getString(ACCESS_KEY_NAME, null),
-                    prefs.getString(ACCESS_SECRET_NAME, null));
-        }
+        mDBApi = application.getAuth().getmDBApi();
+
+        setNavdrawer(new MainNavDrawer(this));
         Intent intent = getIntent();
         directory = intent.getStringExtra("Type");
+
+        getSupportActionBar().setTitle(directory);
+
+
         fileUIArrayList = new ArrayList<String>();
-        adapter = new FilesListAdapter(this, fileUIArrayList, LoginClass.mDBApi, directory);
-        ListView lv = (ListView) findViewById(R.id.listView);
+        adapter = new FilesListAdapter(this, fileUIArrayList, mDBApi, directory);
+        ListView lv = (ListView) findViewById(R.id.activity_file_list_listView);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -130,7 +127,7 @@ public class ListActivityMyAdapter extends ActionBarActivity {
             public void run() {
 
                 try {
-                    Entry entries = LoginClass.mDBApi.metadata(directory, 0, null, true, null);
+                    Entry entries = mDBApi.metadata(directory, 0, null, true, null);
                     for (Entry entry : entries.contents) {
                         fileUIArrayList.add(entry.fileName());
                     } handler.sendEmptyMessage(0);
@@ -176,7 +173,7 @@ public class ListActivityMyAdapter extends ActionBarActivity {
                 @Override
                 public void run() {
                     try {
-                        LoginClass.mDBApi.delete(directory + item);
+                        mDBApi.delete(directory + item);
 
                     } catch (DropboxException e) {
                         e.printStackTrace();

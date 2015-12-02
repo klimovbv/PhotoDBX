@@ -56,7 +56,7 @@
             android:label="PhotoToDropBox" >
         </activity>       
         <activity
-            android:name=".ListActivityMyAdapter"
+            android:name=".activities.FileListActivity"
             android:label="PhotoToDropBox" >
         </activity>
         <activity
