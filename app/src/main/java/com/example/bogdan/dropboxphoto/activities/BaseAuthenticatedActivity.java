@@ -3,7 +3,12 @@ package com.example.bogdan.dropboxphoto.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+
 public abstract class BaseAuthenticatedActivity extends BaseActivity {
+
+    protected DropboxAPI<AndroidAuthSession> mDBApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,6 +20,7 @@ public abstract class BaseAuthenticatedActivity extends BaseActivity {
             finish();
             return;
         }
+        mDBApi = application.getAuth().getmDBApi();
         onDbxAppCreate(savedInstanceState);
     }
 

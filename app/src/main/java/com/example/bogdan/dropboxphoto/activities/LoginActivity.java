@@ -30,8 +30,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             if (application.getAuth().isLoggedIn()) {
                 try {
                     application.getAuth().finishAuth();
-                    Intent intent = new Intent(this, FileListActivity.class);
-                    intent.putExtra("Type", "/Photos/");
+                    Intent intent = new Intent(this, PhotoFilesListActivity.class);
                     startActivity(intent);
                     finish();
                 } catch (IllegalStateException e) {

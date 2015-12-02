@@ -6,7 +6,8 @@ import com.example.bogdan.dropboxphoto.Camera2Activity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.VideoActivity;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
-import com.example.bogdan.dropboxphoto.activities.FileListActivity;
+import com.example.bogdan.dropboxphoto.activities.PhotoFilesListActivity;
+import com.example.bogdan.dropboxphoto.activities.VideoFilesListActivity;
 
 public class MainNavDrawer extends NavDrawer {
 
@@ -14,33 +15,29 @@ public class MainNavDrawer extends NavDrawer {
         super(activity);
 
         addItem(new ActivityNavDrawerItem(
-                FileListActivity.class,
+                PhotoFilesListActivity.class,
                 "Photo List",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems,
-                "/Photos/"));
+                R.id.include_main_nav_drawer_topItems));
 
         addItem(new ActivityNavDrawerItem(
-                FileListActivity.class,
+                VideoFilesListActivity.class,
                 "Video List",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems,
-                "/Video/"
+                R.id.include_main_nav_drawer_topItems
                 ));
 
         addItem(new ActivityNavDrawerItem(
                 Camera2Activity.class,
                 "Make Photo",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems,
-                null));
+                R.id.include_main_nav_drawer_topItems));
 
         addItem(new ActivityNavDrawerItem(
                 VideoActivity.class,
                 "Make Video",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems,
-                null));
+                R.id.include_main_nav_drawer_topItems));
 
         addItem(new BasicNavDrawerItem(
                 "Logout",

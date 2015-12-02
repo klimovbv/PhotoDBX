@@ -28,77 +28,38 @@ import com.example.bogdan.dropboxphoto.views.MyAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class FileListActivity extends BaseAuthenticatedActivity {
-    private static final int DELETE_ID =1;
-    private static final String ACCOUNT_PREFS_NAME = "prefs";
-    private static final String ACCESS_KEY_NAME = "ACCES_KEY";
-    private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+public class VideoFilesListActivity extends BaseAuthenticatedActivity {
+
     private ArrayList<String> fileUIArrayList;
     private FilesListAdapter adapter;
 
-    private String itemForDelete;
     private String directory;
     private Handler handler;
-    private String toggledFileName;
 
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
-    private DropboxAPI<AndroidAuthSession> mDBApi;
 
-    /*@Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0,DELETE_ID,0,"Delete file");
-    }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-        final int position = info.position;
-        View view = info.targetView;
-        if (item.getItemId() == DELETE_ID) {
-            TextView v = (TextView)view.findViewById(R.id.textViewList);
-            itemForDelete = v.getText().toString();
-            fileUIArrayList.remove(position);
-            adapter.notifyDataSetChanged();
-            Toast.makeText(getApplicationContext(),
-                    itemForDelete + " удален.", Toast.LENGTH_SHORT).show();
-
-            Thread deleteThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        LoginClass.mDBApi.delete(directory + itemForDelete);
-
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            deleteThread.start();
-            return true;
-        } else return super.onContextItemSelected(item);
-    }*/
 
     @Override
     protected void onDbxAppCreate (Bundle savedInstanceState) {
         setContentView(R.layout.activity_file_list);
 
-        mDBApi = application.getAuth().getmDBApi();
-
         setNavdrawer(new MainNavDrawer(this));
         Intent intent = getIntent();
-        directory = intent.getStringExtra("Type");
+        directory = "/Video/";
 
         getSupportActionBar().setTitle(directory);
 
-
         fileUIArrayList = new ArrayList<String>();
+
         adapter = new FilesListAdapter(this, fileUIArrayList, mDBApi, directory);
-        ListView lv = (ListView) findViewById(R.id.activity_file_list_listView);
-        lv.setAdapter(adapter);
-        registerForContextMenu(lv);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
+        fileList.setAdapter(adapter);
+        registerForContextMenu(fileList);
+
+        fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selectedItem = adapter.getItem(position);
@@ -110,7 +71,7 @@ public class FileListActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        fileList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 toggledFileSelection(adapter.getItem(position));
@@ -229,20 +190,14 @@ public class FileListActivity extends BaseAuthenticatedActivity {
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
-            FileListActivity.this.actionMode = null;
+            VideoFilesListActivity.this.actionMode = null;
             selectedFiles.clear();
             adapter.notifyDataSetChanged();
         }
     }
 
     private void showFile(String fileToShow) {
-        Intent intent;
-        if (directory.equals("/Photos/")) {
-            intent = new Intent(getApplicationContext(), PreviewImageActivity.class);
-        } else {
-            intent = new Intent(getApplicationContext(), VideoPlayer.class);
-        }
-
+        Intent intent = new Intent(getApplicationContext(), VideoPlayer.class);
         intent.putExtra("filepath", fileToShow);
         startActivity(intent);
     }

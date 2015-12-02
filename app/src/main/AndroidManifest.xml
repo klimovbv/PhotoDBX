@@ -25,10 +25,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|keyboard"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
 
         <activity
@@ -56,9 +53,19 @@
             android:label="PhotoToDropBox" >
         </activity>       
         <activity
-            android:name=".activities.FileListActivity"
+            android:name=".activities.PhotoFilesListActivity"
+            android:label="PhotoToDropBox" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.VideoFilesListActivity"
             android:label="PhotoToDropBox" >
         </activity>
+
         <activity
             android:name=".ListActivityManager"
             android:label="PhotoToDropBox" >
@@ -69,7 +76,6 @@
         </activity>
         <activity
 
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:name=".PreviewImageActivity"
             android:label="PhotoToDropBox"
             android:configChanges="orientation">
