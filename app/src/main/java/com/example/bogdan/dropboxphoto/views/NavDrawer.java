@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
+import com.example.bogdan.dropboxphoto.activities.PhotoFilesListActivity;
+import com.example.bogdan.dropboxphoto.activities.VideoFilesListActivity;
 
 import java.util.ArrayList;
 
@@ -52,7 +54,7 @@ public class NavDrawer {
         if (isOpen)
             drawerLayout.openDrawer(GravityCompat.START);
         else
-            drawerLayout.openDrawer(GravityCompat.START);
+            drawerLayout.closeDrawer(GravityCompat.START);
     }
 
     public void addItem(NavDrawerItem item) {
@@ -132,6 +134,7 @@ public class NavDrawer {
         @Override
         public void onClick(View view) {
             navDrawer.setSelectedItem(this);
+            navDrawer.setOpen(false);
         }
     }
 
@@ -155,7 +158,8 @@ public class NavDrawer {
         @Override
         public void onClick(View view) {
             super.onClick(view);
-            navDrawer.setOpen(false);
+
+
 
             final BaseActivity activity = navDrawer.activity;
             if (activity.getClass() == targetActivity) {

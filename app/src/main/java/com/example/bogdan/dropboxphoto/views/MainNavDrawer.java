@@ -1,5 +1,6 @@
 package com.example.bogdan.dropboxphoto.views;
 
+import android.content.Intent;
 import android.view.View;
 
 import com.example.bogdan.dropboxphoto.Camera2Activity;
@@ -25,19 +26,29 @@ public class MainNavDrawer extends NavDrawer {
                 "Video List",
                 R.drawable.ic_launcher,
                 R.id.include_main_nav_drawer_topItems
-                ));
+        ));
 
-        addItem(new ActivityNavDrawerItem(
-                Camera2Activity.class,
+        addItem(new BasicNavDrawerItem(
                 "Make Photo",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems));
+                R.id.include_main_nav_drawer_topItems) {
+            @Override
+            public void onClick(View view) {
+                super.onClick(view);
+                activity.startActivity(new Intent(activity, Camera2Activity.class));
+            }
+        });
 
-        addItem(new ActivityNavDrawerItem(
-                VideoActivity.class,
+        addItem(new BasicNavDrawerItem(
                 "Make Video",
                 R.drawable.ic_launcher,
-                R.id.include_main_nav_drawer_topItems));
+                R.id.include_main_nav_drawer_topItems) {
+            @Override
+            public void onClick(View view) {
+                super.onClick(view);
+                activity.startActivity(new Intent(activity, VideoActivity.class));
+            }
+        });
 
         addItem(new BasicNavDrawerItem(
                 "Logout",

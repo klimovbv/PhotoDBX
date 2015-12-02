@@ -25,6 +25,8 @@ import java.io.IOException;
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
 
+    private boolean isRegisteredWithBus;
+
     public static final int REQUEST_PHOTO_DELETE = 100;
     public static final String RESULT_EXTRA_PHOTO = "RESULT_EXTRA_PHOTO";
     private String filePath;
@@ -34,6 +36,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     private Bitmap bitmap;
     private Handler handler;
     private TouchImageView imageView;
+
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
@@ -100,7 +103,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     private void closeMessage(int resultCode){
         Intent data = new Intent();
         data.putExtra(RESULT_EXTRA_PHOTO, filePath);
-        setResult(resultCode);
+        setResult(resultCode, data);
         finish();
     }
 
@@ -117,20 +120,19 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
                                 public void run() {
                                     try {
                                         mDBApi.delete("/Photos/" + filePath);
-                                        closeMessage(REQUEST_PHOTO_DELETE);
                                     } catch (DropboxException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             });
                             deleteThread.start();
+                            closeMessage(REQUEST_PHOTO_DELETE);
                         }
                     })
                     .setCancelable(false)
                     .setNeutralButton("Cancel", null)
                     .create();
             dialog.show();
-            finish();
         }
 
         return false;

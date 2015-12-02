@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
     private String selectedItem;
+    private int itemId;
 
 
     @Override
@@ -218,8 +220,12 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.d("myLogs", Integer.toString(requestCode) + Integer.toString(resultCode) + data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
         if (requestCode == REQUEST_SHOW_PHOTO && resultCode == PreviewImageActivity.REQUEST_PHOTO_DELETE && data != null){
+            Log.d("myLogs", " --------- " + data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
             fileUIArrayList.remove(data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
+            adapter.notifyDataSetChanged();
         }
     }
 }
