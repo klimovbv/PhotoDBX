@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
@@ -15,12 +14,13 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
+import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
 import com.example.bogdan.dropboxphoto.views.MyAdapter;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +36,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
     private String selectedItem;
-    private int itemId;
 
 
     @Override
@@ -53,7 +52,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
 
         ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
         fileList.setAdapter(adapter);
-        /*registerForContextMenu(fileList);*/
         fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -74,13 +72,13 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        handler = new Handler(){
+        /*handler = new Handler(){
             public void handleMessage(Message msg){
                 adapter.notifyDataSetChanged();
             }
-        };
+        };*/
 
-        Thread dataThread = new Thread(new Runnable() {
+        /*Thread dataThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
@@ -94,10 +92,18 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
                 }
             }
         });
-        dataThread.start();
+        dataThread.start();*/
+        bus.post(new AccountService.LoadFileListRequest(this, directory));
 
         selectedFiles = new HashSet<>();
 
+    }
+
+    @Subscribe
+    public void onLoadFileList(AccountService.LoadFileListResponse response){
+        fileUIArrayList.clear();
+        fileUIArrayList.addAll(response.fileList);
+        adapter.notifyDataSetChanged();
     }
 
     private void toggledFileSelection(String selectedItem) {
