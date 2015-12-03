@@ -1,6 +1,5 @@
 package com.example.bogdan.dropboxphoto.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,9 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
-import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
@@ -50,12 +47,13 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         directory = "/Photos/";
         getSupportActionBar().setTitle(directory);
 
+        adapter = new FilesListAdapter(this, directory);
 
-        fileUIArrayList = new ArrayList<String>();
-        adapter = new FilesListAdapter(this, fileUIArrayList, mDBApi, directory);
+        fileUIArrayList = adapter.getFileList();
+
         ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
         fileList.setAdapter(adapter);
-        registerForContextMenu(fileList);
+        /*registerForContextMenu(fileList);*/
         fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -198,11 +196,10 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         intent.putExtra("filepath", fileToShow);
         startActivityForResult(intent, REQUEST_SHOW_PHOTO);
     }
-
     private class FilesListAdapter extends MyAdapter {
 
-        public FilesListAdapter(Activity activity, ArrayList<String> names, DropboxAPI<AndroidAuthSession> mDBApi, String directory) {
-            super(activity, names, mDBApi, directory);
+        public FilesListAdapter(BaseAuthenticatedActivity activity, String directory) {
+            super(activity, directory);
 
         }
 

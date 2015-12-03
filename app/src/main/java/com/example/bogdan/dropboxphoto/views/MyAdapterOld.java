@@ -1,5 +1,7 @@
 package com.example.bogdan.dropboxphoto.views;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
@@ -17,7 +19,6 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.R;
-import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,26 +26,40 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class MyAdapter extends BaseAdapter {
+public class MyAdapterOld extends BaseAdapter {
     private static int backgroundColor;
-    private ArrayList<String> fileList;
-    private DropboxAPI<AndroidAuthSession> mDBApi;
-    private LayoutInflater inflater;
-    private BaseAuthenticatedActivity activity;
+    private final ArrayList<String> names;
+    private final DropboxAPI<AndroidAuthSession> mDBApi;
+    private LayoutInflater layoutInflater;
     private String directory;
 
-    public MyAdapter(BaseAuthenticatedActivity activity,
-                     String directory) {
+    public MyAdapterOld(Activity activity, ArrayList<String> names, DropboxAPI<AndroidAuthSession> mDBApi,
+                        String directory) {
+        super();
+        this.names = names;
+        this.mDBApi = mDBApi;
         this.directory  = directory;
-        this.activity = activity;
-        fileList = new ArrayList<>();
-        inflater = activity.getLayoutInflater();
+        layoutInflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         backgroundColor = activity.getResources().getColor(R.color.background_list_color);
-        mDBApi = activity.getDbxApplication().getAuth().getmDBApi();
+    }
+    private static class ViewHolder {
+        public ImageView imageView;
+        public TextView textView;
     }
 
-    public ArrayList<String> getFileList() {
-        return fileList;
+    @Override
+    public int getCount() {
+        return names.size();
+    }
+
+    @Override
+    public String getItem(int position) {
+        return names.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -52,54 +67,32 @@ public class MyAdapter extends BaseAdapter {
         ViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.list_item, parent, false);
-            holder = new ViewHolder(convertView);
+            convertView = layoutInflater.inflate(R.layout.list_item, parent, false);
+            holder = new ViewHolder();
+            holder.textView = (TextView)convertView.findViewById(R.id.textViewList);
+            holder.imageView = (ImageView)convertView.findViewById(R.id.imageViewList);
             convertView.setTag(holder);
+
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.fileName.setText(getItem(position));
 
-        if (cancelPotentialDownload(getItem(position), holder.thumbnailImage)){
-            LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.thumbnailImage,
+        holder.textView.setText(getItem(position));
+
+
+        if (cancelPotentialDownload(getItem(position), holder.imageView)){
+            LoadingThumbAsyncTask loadingThumbAsyncTask = new LoadingThumbAsyncTask(holder.imageView,
                     getItem(position), mDBApi);
             DownloadedDrawable downloadedDrawable = new DownloadedDrawable(loadingThumbAsyncTask);
-            holder.thumbnailImage.setBackground(downloadedDrawable);
-            holder.thumbnailImage.setImageResource(R.drawable.ic_camera_alt_black_24dp);
+            holder.imageView.setBackground(downloadedDrawable);
+            holder.imageView.setImageResource(R.drawable.ic_camera_alt_black_24dp);
 
             loadingThumbAsyncTask.execute();
         }
         return convertView;
     }
 
-    private static class ViewHolder {
-        public ImageView thumbnailImage;
-        public TextView fileName;
-
-        private ViewHolder(View view) {
-            this.thumbnailImage = (ImageView)view.findViewById(R.id.imageViewList);
-            this.fileName = (TextView)view.findViewById(R.id.textViewList);
-        }
-    }
-
-
-
-
-    @Override
-    public int getCount() {
-        return fileList.size();
-    }
-
-    @Override
-    public String getItem(int position) {
-        return fileList.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
 
     class LoadingThumbAsyncTask extends AsyncTask<Void, Void, Bitmap> {
 
@@ -191,9 +184,5 @@ public class MyAdapter extends BaseAdapter {
             }
         }
         return true;
-    }
-
-    public interface ListActivityListener {
-        void onFileClicked(String fileName);
     }
 }

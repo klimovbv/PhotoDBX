@@ -19,11 +19,10 @@ import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
-import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.VideoPlayer;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
-import com.example.bogdan.dropboxphoto.views.MyAdapter;
+import com.example.bogdan.dropboxphoto.views.MyAdapterOld;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -202,7 +201,7 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
         startActivity(intent);
     }
 
-    private class FilesListAdapter extends MyAdapter {
+    private class FilesListAdapter extends MyAdapterOld {
 
         public FilesListAdapter(Activity activity, ArrayList<String> names, DropboxAPI<AndroidAuthSession> mDBApi, String directory) {
             super(activity, names, mDBApi, directory);

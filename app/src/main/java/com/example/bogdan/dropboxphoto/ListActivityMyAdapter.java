@@ -1,3 +1,4 @@
+/*
 package com.example.bogdan.dropboxphoto;
 
 import android.app.Activity;
@@ -43,7 +44,8 @@ public class ListActivityMyAdapter extends BaseAuthenticatedActivity {
     private HashSet<String> selectedFiles;
     private DropboxAPI<AndroidAuthSession> mDBApi;
 
-    /*@Override
+    */
+/*@Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.add(0,DELETE_ID,0,"Delete file");
@@ -76,7 +78,8 @@ public class ListActivityMyAdapter extends BaseAuthenticatedActivity {
             deleteThread.start();
             return true;
         } else return super.onContextItemSelected(item);
-    }*/
+    }*//*
+
 
     @Override
     protected void onDbxAppCreate (Bundle savedInstanceState) {
@@ -267,3 +270,4 @@ public class ListActivityMyAdapter extends BaseAuthenticatedActivity {
 
 
 }
+*/
