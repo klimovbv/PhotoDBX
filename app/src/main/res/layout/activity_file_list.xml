@@ -19,6 +19,19 @@
             android:layout_below="@id/include_toolbar"/>
 
     </RelativeLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#aa0e10a2"
+        android:clickable="true"
+        android:visibility="gone"
+        android:id="@+id/activity_file_list_progressFrame">
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateOnly="true"
+            android:layout_gravity="center"/>
+    </FrameLayout>
     <include layout="@layout/include_main_nav_drawer"/>
     
 </android.support.v4.widget.DrawerLayout>

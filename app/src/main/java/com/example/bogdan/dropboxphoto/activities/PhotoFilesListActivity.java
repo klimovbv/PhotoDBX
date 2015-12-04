@@ -3,7 +3,6 @@ package com.example.bogdan.dropboxphoto.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
@@ -14,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.AccountService;
@@ -31,11 +29,11 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     private FilesListAdapter adapter;
 
     private String directory;
-    private Handler handler;
 
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
     private String selectedItem;
+    private View progressFrame;
 
 
     @Override
@@ -46,8 +44,12 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         directory = "/Photos/";
         getSupportActionBar().setTitle(directory);
 
-        adapter = new FilesListAdapter(this, directory);
+        progressFrame = findViewById(R.id.activity_file_list_progressFrame);
+        progressFrame.setVisibility(View.VISIBLE);
 
+        selectedFiles = new HashSet<>();
+
+        adapter = new FilesListAdapter(this, directory);
         fileUIArrayList = adapter.getFileList();
 
         ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
@@ -72,38 +74,40 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        /*handler = new Handler(){
-            public void handleMessage(Message msg){
-                adapter.notifyDataSetChanged();
-            }
-        };*/
-
-        /*Thread dataThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    Entry entries = mDBApi.metadata(directory, 0, null, true, null);
-                    for (Entry entry : entries.contents) {
-                        fileUIArrayList.add(entry.fileName());
-                    } handler.sendEmptyMessage(0);
-                } catch (DropboxException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        dataThread.start();*/
-        bus.post(new AccountService.LoadFileListRequest(this, directory));
-
-        selectedFiles = new HashSet<>();
-
+        bus.post(new AccountService.LoadFileListRequest(directory));
     }
+
 
     @Subscribe
     public void onLoadFileList(AccountService.LoadFileListResponse response){
         fileUIArrayList.clear();
         fileUIArrayList.addAll(response.fileList);
         adapter.notifyDataSetChanged();
+        progressFrame.setVisibility(View.GONE);
+    }
+
+    private void deleteSelectedItems (HashSet <String> toggledItems){
+        /*Log.d("myLogs", "fileNames in  deleteSelectedItems = " + toggledItems.size());*/
+        progressFrame.setVisibility(View.VISIBLE);
+        bus.post(new AccountService.DeleteFileRequest(directory, toggledItems));
+        /*for (final String fileName : toggledItems){
+            bus.post(new AccountService.DeleteFilleRequest(directory, fileName));
+        }*/
+
+    }
+
+    @Subscribe
+    public void onDeleteFile(AccountService.DeleteFileResponse response){
+        HashSet<String> fileNames = response.deletedFiles;
+        Log.d("myLogs", "fileName in onDeleteFile = " + fileNames.size());
+        for (String fileName : fileNames){
+            fileUIArrayList.remove(fileName);
+            Toast.makeText(getApplicationContext(),
+                    fileName + " удален.", Toast.LENGTH_SHORT).show();
+        }
+        adapter.notifyDataSetChanged();
+        progressFrame.setVisibility(View.GONE);
+        /*actionMode.finish();*/
     }
 
     private void toggledFileSelection(String selectedItem) {
@@ -125,29 +129,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         }
 
         adapter.notifyDataSetChanged();
-    }
-
-    private void deleteSelectedItems (Iterable <String> toggledItems){
-        for (final String item : toggledItems){
-            fileUIArrayList.remove(item);
-            Toast.makeText(getApplicationContext(),
-                    item + " удален.", Toast.LENGTH_SHORT).show();
-
-            Thread deleteThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mDBApi.delete(directory + item);
-
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            deleteThread.start();
-
-        }
-        actionMode.finish();
     }
 
     private class ItemsActionModeCallback implements ActionMode.Callback{
@@ -206,7 +187,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
 
         public FilesListAdapter(BaseAuthenticatedActivity activity, String directory) {
             super(activity, directory);
-
         }
 
         @Override
@@ -223,10 +203,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        Log.d("myLogs", Integer.toString(requestCode) + Integer.toString(resultCode) + data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
         if (requestCode == REQUEST_SHOW_PHOTO && resultCode == PreviewImageActivity.REQUEST_PHOTO_DELETE && data != null){
-            Log.d("myLogs", " --------- " + data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
             fileUIArrayList.remove(data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
             adapter.notifyDataSetChanged();
         }

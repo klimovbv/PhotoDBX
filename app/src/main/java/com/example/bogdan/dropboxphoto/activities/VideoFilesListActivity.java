@@ -145,7 +145,7 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
             deleteThread.start();
 
         }
-        actionMode.finish();
+        /*actionMode.finish();*/
     }
 
     private class ItemsActionModeCallback implements ActionMode.Callback{
