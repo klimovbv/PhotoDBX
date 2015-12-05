@@ -1,4 +1,4 @@
-package com.example.bogdan.dropboxphoto;
+package com.example.bogdan.dropboxphoto.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -14,17 +14,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
+import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
 import com.example.bogdan.dropboxphoto.services.AccountService;
+import com.example.bogdan.dropboxphoto.views.TouchImageView;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {

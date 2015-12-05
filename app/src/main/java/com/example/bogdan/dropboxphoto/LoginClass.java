@@ -30,8 +30,7 @@ public class LoginClass {
 
     private static AndroidAuthSession buildSession() {
         AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeyPair);
-        loadAuth(session);
+        AndroidAuthSession session = new AndroidAuthSession(appKeyPair);        loadAuth(session);
         return session;
     }
 

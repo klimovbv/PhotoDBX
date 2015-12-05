@@ -22,13 +22,6 @@
         android:name=".infrastructure.DbxApplication">
 
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboard"
-            android:label="@string/app_name" >
-
-        </activity>
-
-        <activity
             android:name="com.dropbox.client2.android.AuthActivity"
 
             android:launchMode="singleTask" >
@@ -43,7 +36,7 @@
         </activity>
         <activity
 
-            android:name=".Camera2Activity"
+            android:name=".activities.Camera2Activity"
             android:label="PhotoToDropBox" >
         </activity>
 
@@ -76,7 +69,7 @@
         </activity>
         <activity
 
-            android:name=".PreviewImageActivity"
+            android:name=".activities.PreviewImageActivity"
             android:label="PhotoToDropBox"
             android:configChanges="orientation">
         </activity>
@@ -84,7 +77,7 @@
         <activity android:name=".activities.LoginActivity"/>
 
         <service
-            android:name=".UploadService"
+            android:name=".services.UploadService"
             android:enabled="true"
             android:exported="true" >
         </service>

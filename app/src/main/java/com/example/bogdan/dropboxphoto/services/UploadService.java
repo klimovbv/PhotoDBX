@@ -1,4 +1,4 @@
-package com.example.bogdan.dropboxphoto;
+package com.example.bogdan.dropboxphoto.services;
 
 import android.app.Application;
 import android.app.Service;

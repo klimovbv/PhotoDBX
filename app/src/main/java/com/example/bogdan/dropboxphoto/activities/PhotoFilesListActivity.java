@@ -14,8 +14,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.bogdan.dropboxphoto.Camera2Activity;
-import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
@@ -36,7 +34,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity implements
     private HashSet<String> selectedFiles;
     private String selectedItem;
     private View progressFrame;
-    private ImageButton newPhotoButton;
 
 
     @Override
@@ -47,12 +44,11 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity implements
         directory = "/Photos/";
         getSupportActionBar().setTitle(directory);
 
-        newPhotoButton = (ImageButton)findViewById(R.id.activity_file_list_newPhotoButton);
+        ImageButton newPhotoButton = (ImageButton) findViewById(R.id.activity_file_list_newPhotoButton);
         progressFrame = findViewById(R.id.activity_file_list_progressFrame);
         progressFrame.setVisibility(View.VISIBLE);
 
         newPhotoButton.setOnClickListener(this);
-
 
         selectedFiles = new HashSet<>();
 

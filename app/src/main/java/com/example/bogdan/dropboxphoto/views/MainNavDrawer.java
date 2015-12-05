@@ -3,7 +3,7 @@ package com.example.bogdan.dropboxphoto.views;
 import android.content.Intent;
 import android.view.View;
 
-import com.example.bogdan.dropboxphoto.Camera2Activity;
+import com.example.bogdan.dropboxphoto.activities.Camera2Activity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.VideoActivity;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
@@ -34,7 +34,6 @@ public class MainNavDrawer extends NavDrawer {
                 R.id.include_main_nav_drawer_topItems) {
             @Override
             public void onClick(View view) {
-                super.onClick(view);
                 activity.startActivity(new Intent(activity, Camera2Activity.class));
             }
         });
@@ -45,7 +44,6 @@ public class MainNavDrawer extends NavDrawer {
                 R.id.include_main_nav_drawer_topItems) {
             @Override
             public void onClick(View view) {
-                super.onClick(view);
                 activity.startActivity(new Intent(activity, VideoActivity.class));
             }
         });

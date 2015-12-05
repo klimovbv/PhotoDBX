@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
-import com.example.bogdan.dropboxphoto.MainActivity;
+import com.example.bogdan.dropboxphoto.activities.LoginActivity;
 
 public class Auth {
     private static final String APP_KEY = "e7r6jtptl6t3rz9";
@@ -86,7 +86,7 @@ public class Auth {
         setAuthToken(null);
         mDBApi = null;
 
-        Intent loginIntent = new Intent(context, MainActivity.class);
+        Intent loginIntent = new Intent(context, LoginActivity.class);
         loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(loginIntent);
 

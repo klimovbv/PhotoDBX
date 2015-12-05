@@ -24,6 +24,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import com.example.bogdan.dropboxphoto.services.UploadService;
+
 import java.io.File;
 import java.io.IOException;
 

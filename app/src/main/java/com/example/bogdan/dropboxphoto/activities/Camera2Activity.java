@@ -1,9 +1,7 @@
-package com.example.bogdan.dropboxphoto;
+package com.example.bogdan.dropboxphoto.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,11 +20,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
-import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
+import com.example.bogdan.dropboxphoto.R;
+import com.example.bogdan.dropboxphoto.services.UploadService;
 import com.example.bogdan.dropboxphoto.services.Utils;
 
 import java.io.File;
@@ -230,7 +228,7 @@ public class Camera2Activity extends BaseAuthenticatedActivity implements Surfac
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (Camera2Activity.this, UploadService.class);
-                    intent.putExtra("filePath",fileName);
+                    intent.putExtra("filePath", fileName);
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
                 } catch (FileNotFoundException e) {
