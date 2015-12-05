@@ -17,7 +17,17 @@
             android:layout_height="match_parent"
             android:id="@+id/activity_file_list_listView"
             android:layout_below="@id/include_toolbar"/>
-
+        <ImageButton
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/round_button"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/activity_file_list_newPhotoButton"
+            android:padding="5dp"
+            android:src="@drawable/ic_action_camera"/>
     </RelativeLayout>
     <FrameLayout
         android:layout_width="match_parent"

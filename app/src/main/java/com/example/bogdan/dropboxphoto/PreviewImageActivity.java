@@ -14,13 +14,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
+import com.example.bogdan.dropboxphoto.services.AccountService;
+import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
@@ -36,6 +40,9 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     private Bitmap bitmap;
     private Handler handler;
     private TouchImageView imageView;
+    private String directory;
+    private View progressFrame;
+
 
 
     @Override
@@ -44,7 +51,10 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
         Intent intent = getIntent();
 
         filePath = intent.getStringExtra("filepath");
+        directory = "/Photos/";
         imageView = (TouchImageView)findViewById(R.id.imageView);
+        progressFrame = findViewById(R.id.activity_preview_photo_progressFrame);
+        progressFrame.setVisibility(View.GONE);
 
         toolbar.setNavigationIcon(R.drawable.ic_ab_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -115,18 +125,8 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
                     .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Thread deleteThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        mDBApi.delete("/Photos/" + filePath);
-                                    } catch (DropboxException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                            deleteThread.start();
-                            closeMessage(REQUEST_PHOTO_DELETE);
+                            progressFrame.setVisibility(View.VISIBLE);
+                            bus.post(new AccountService.DeleteFileRequest(directory, null, filePath));
                         }
                     })
                     .setCancelable(false)
@@ -136,6 +136,13 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
         }
 
         return false;
+    }
+
+    @Subscribe
+    public void onImageDeleted(AccountService.DeleteFileResponse response){
+        progressFrame.setVisibility(View.GONE);
+        /*Toast.makeText(this, response.deletedFiles.toString() + " deleted", Toast.LENGTH_SHORT).show();*/
+        closeMessage(REQUEST_PHOTO_DELETE);
     }
 }
 

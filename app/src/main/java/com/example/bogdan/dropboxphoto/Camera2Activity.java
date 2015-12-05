@@ -26,6 +26,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
 import com.example.bogdan.dropboxphoto.services.Utils;
 
 import java.io.File;
@@ -33,11 +34,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class Camera2Activity extends Activity implements SurfaceHolder.Callback {
+public class Camera2Activity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
 
-    private static final String ACCOUNT_PREFS_NAME = "prefs";
-    private static final String ACCESS_KEY_NAME = "ACCES_KEY";
-    private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
     private final String PHOTO_DIR = "/Photos/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
@@ -56,14 +54,11 @@ public class Camera2Activity extends Activity implements SurfaceHolder.Callback 
     private File photoFile;
     private String fileName;
     private ImageButton buttonPhoto, buttonChangeCamera;
-    private String key, secret;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onDbxAppCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera);
         cameraId = 1;
         identificator = 0;
@@ -78,12 +73,6 @@ public class Camera2Activity extends Activity implements SurfaceHolder.Callback 
         holder.addCallback(this);
         rotate = false;
         orientation = PORTRAIT_UP;
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        key = prefs.getString(ACCESS_KEY_NAME, null);
-        secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        if (!LoginClass.isLoggedIn) {
-            LoginClass.makingSession(key, secret);
-        }
         int sensorType = Sensor.TYPE_GRAVITY;
         SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
@@ -171,8 +160,6 @@ public class Camera2Activity extends Activity implements SurfaceHolder.Callback 
                 cameraSize.width, cameraSize.height);
         lp.height = heightForCamera;
         lp.width = widthForCamera;
-        /*parameters.setPreviewSize(cameraSize.width, cameraSize.height);
-        camera.setParameters(parameters);*/
         return lp;
     }
     private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
@@ -243,8 +230,6 @@ public class Camera2Activity extends Activity implements SurfaceHolder.Callback 
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent (Camera2Activity.this, UploadService.class);
-                    intent.putExtra("key", key);
-                    intent.putExtra("secret",  secret);
                     intent.putExtra("filePath",fileName);
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);

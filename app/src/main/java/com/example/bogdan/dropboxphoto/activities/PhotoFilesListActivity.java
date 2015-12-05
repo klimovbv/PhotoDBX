@@ -10,9 +10,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.bogdan.dropboxphoto.Camera2Activity;
 import com.example.bogdan.dropboxphoto.PreviewImageActivity;
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.AccountService;
@@ -23,7 +25,7 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
+public class PhotoFilesListActivity extends BaseAuthenticatedActivity implements View.OnClickListener {
     private static final int REQUEST_SHOW_PHOTO = 1;
     private ArrayList<String> fileUIArrayList;
     private FilesListAdapter adapter;
@@ -34,6 +36,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     private HashSet<String> selectedFiles;
     private String selectedItem;
     private View progressFrame;
+    private ImageButton newPhotoButton;
 
 
     @Override
@@ -44,8 +47,12 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         directory = "/Photos/";
         getSupportActionBar().setTitle(directory);
 
+        newPhotoButton = (ImageButton)findViewById(R.id.activity_file_list_newPhotoButton);
         progressFrame = findViewById(R.id.activity_file_list_progressFrame);
         progressFrame.setVisibility(View.VISIBLE);
+
+        newPhotoButton.setOnClickListener(this);
+
 
         selectedFiles = new HashSet<>();
 
@@ -87,13 +94,8 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     }
 
     private void deleteSelectedItems (HashSet <String> toggledItems){
-        /*Log.d("myLogs", "fileNames in  deleteSelectedItems = " + toggledItems.size());*/
         progressFrame.setVisibility(View.VISIBLE);
-        bus.post(new AccountService.DeleteFileRequest(directory, toggledItems));
-        /*for (final String fileName : toggledItems){
-            bus.post(new AccountService.DeleteFilleRequest(directory, fileName));
-        }*/
-
+        bus.post(new AccountService.DeleteFileRequest(directory, toggledItems, null));
     }
 
     @Subscribe
@@ -107,7 +109,6 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         }
         adapter.notifyDataSetChanged();
         progressFrame.setVisibility(View.GONE);
-        /*actionMode.finish();*/
     }
 
     private void toggledFileSelection(String selectedItem) {
@@ -129,6 +130,11 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         }
 
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onClick(View v) {
+        startActivity(new Intent(this, Camera2Activity.class));
     }
 
     private class ItemsActionModeCallback implements ActionMode.Callback{
@@ -181,7 +187,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
     private void showFile(String fileToShow) {
         Intent intent = new Intent(getApplicationContext(), PreviewImageActivity.class);
         intent.putExtra("filepath", fileToShow);
-        startActivityForResult(intent, REQUEST_SHOW_PHOTO);
+        startActivity(intent);
     }
     private class FilesListAdapter extends MyAdapter {
 
@@ -201,11 +207,11 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity {
         }
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SHOW_PHOTO && resultCode == PreviewImageActivity.REQUEST_PHOTO_DELETE && data != null){
             fileUIArrayList.remove(data.getStringExtra(PreviewImageActivity.RESULT_EXTRA_PHOTO));
             adapter.notifyDataSetChanged();
         }
-    }
+    }*/
 }

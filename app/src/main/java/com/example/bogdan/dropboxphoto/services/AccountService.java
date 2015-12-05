@@ -68,10 +68,12 @@ public final class AccountService {
     public static class DeleteFileRequest {
         public HashSet<String> fileNames;
         public String directory;
+        public String fileToDelete;
 
-        public DeleteFileRequest(String directory, HashSet<String> fileNames) {
+        public DeleteFileRequest(String directory, HashSet<String> fileNames, String fileToDelete) {
             this.fileNames = fileNames;
             this.directory = directory;
+            this.fileToDelete = fileToDelete;
         }
     }
 
@@ -88,8 +90,13 @@ public final class AccountService {
 
     @Subscribe
     public void onDeleteFileFromList(DeleteFileRequest request){
-        String fileNames[] = request.fileNames.toArray(new String[request.fileNames.size()]);
-        new DeleteFileThread(request.directory).execute(fileNames);
+        if (request.fileNames != null) {
+            String fileNames[] = request.fileNames.toArray(new String[request.fileNames.size()]);
+            new DeleteFileThread(request.directory).execute(fileNames);
+        } else {
+            String fileNames = request.fileToDelete;
+            new DeleteFileThread(request.directory).execute(fileNames);
+        }
     }
 
     private class DeleteFileThread extends AsyncTask<String, Void, HashSet<String>> {
