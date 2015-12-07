@@ -1,9 +1,7 @@
-package com.example.bogdan.dropboxphoto;
+package com.example.bogdan.dropboxphoto.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -20,26 +18,23 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.UploadService;
+import com.example.bogdan.dropboxphoto.services.Utils;
 
 import java.io.File;
 import java.io.IOException;
 
-public class VideoActivity extends Activity implements SurfaceHolder.Callback {
+public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
 
-    private static final String ACCOUNT_PREFS_NAME = "prefs";
-    private static final String ACCESS_KEY_NAME = "ACCES_KEY";
-    private static final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
     private static final String VIDEO_DIR = "/Video/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private String key, secret;
     private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
@@ -55,18 +50,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private boolean isRecord;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onDbxAppCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_video);
-        SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        key = prefs.getString(ACCESS_KEY_NAME, null);
-        secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        if (!LoginClass.isLoggedIn) {
-            LoginClass.makingSession(key, secret);
-        }
         buttonRecord = (ImageButton) findViewById(R.id.record_button);
         buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
         surface = (SurfaceView) findViewById(R.id.surfaceViewVideo);
@@ -235,17 +222,17 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     public void onClickVideo (View view) {
         if (isRecord) {
             onClickStopRecord();
-            buttonRecord.setImageResource(R.drawable.ic_videocam_black_24dp);
+            buttonRecord.setImageResource(R.drawable.ic_videocam_white_24dp);
             isRecord = false;
         } else {
             File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
             sdPath.mkdir();
             videoFile = new File(sdPath,
-                    "testvideo" + System.currentTimeMillis() + ".3gp");
+                    new Utils().makeFileName(getApplicationContext()) + ".3gp");
             if (prepareVideoRecorder()) {
                 mediaRecorder.start();
-                buttonRecord.setImageResource(R.drawable.ic_stop_black_24dp);
+                buttonRecord.setImageResource(R.drawable.ic_stop_white_24dp);
                 isRecord = true;
                 buttonChangeCamera.setVisibility(View.INVISIBLE);
             } else {
@@ -262,8 +249,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             mediaRecorder.stop();
             releaseMediaRecorder();
             Intent intent = new Intent (VideoActivity.this, UploadService.class);
-            intent.putExtra("key", key);
-            intent.putExtra("secret",  secret);
             intent.putExtra("filePath",videoFile.getAbsolutePath());
             intent.putExtra("dirPath", VIDEO_DIR);
             startService(intent);
@@ -328,8 +313,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             mediaRecorder.stop();
             releaseMediaRecorder();
             Intent intent = new Intent (VideoActivity.this, UploadService.class);
-            intent.putExtra("key", key);
-            intent.putExtra("secret",  secret);
             intent.putExtra("filePath",videoFile.getAbsolutePath());
             intent.putExtra("dirPath", VIDEO_DIR);
             startService(intent);
@@ -345,7 +328,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     protected void onResume() {
         super.onResume();
         isRecord = false;
-        buttonRecord.setImageResource(R.drawable.ic_videocam_black_24dp);
+        buttonRecord.setImageResource(R.drawable.ic_videocam_white_24dp);
         if (Camera.getNumberOfCameras() > 1) {
             buttonChangeCamera.setVisibility(View.VISIBLE);
         }

@@ -1,12 +1,11 @@
 package com.example.bogdan.dropboxphoto.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,14 +14,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.DropboxAPI.Entry;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.R;
-import com.example.bogdan.dropboxphoto.VideoPlayer;
+import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
-import com.example.bogdan.dropboxphoto.views.MyAdapterOld;
+import com.example.bogdan.dropboxphoto.views.MyAdapter;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,6 +33,7 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
 
     private ActionMode actionMode;
     private HashSet<String> selectedFiles;
+    private View progressFrame;
 
 
 
@@ -50,9 +47,11 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
 
         getSupportActionBar().setTitle(directory);
 
-        fileUIArrayList = new ArrayList<String>();
+        progressFrame = findViewById(R.id.activity_file_list_progressFrame);
+        progressFrame.setVisibility(View.VISIBLE);
 
-        adapter = new FilesListAdapter(this, fileUIArrayList, mDBApi, directory);
+        adapter = new FilesListAdapter(this, directory);
+        fileUIArrayList = adapter.getFileList();
 
         ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
         fileList.setAdapter(adapter);
@@ -78,31 +77,19 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        handler = new Handler(){
-            public void handleMessage(Message msg){
-                adapter.notifyDataSetChanged();
-            }
-        };
-
-        Thread dataThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    Entry entries = mDBApi.metadata(directory, 0, null, true, null);
-                    for (Entry entry : entries.contents) {
-                        fileUIArrayList.add(entry.fileName());
-                    } handler.sendEmptyMessage(0);
-                } catch (DropboxException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        dataThread.start();
+        bus.post(new AccountService.LoadFileListRequest(directory));
 
         selectedFiles = new HashSet<>();
-
     }
+
+    @Subscribe
+    public void onLoadFileList(AccountService.LoadFileListResponse response){
+        fileUIArrayList.clear();
+        fileUIArrayList.addAll(response.fileList);
+        adapter.notifyDataSetChanged();
+        progressFrame.setVisibility(View.GONE);
+    }
+
 
     private void toggledFileSelection(String selectedItem) {
         if (selectedFiles.contains(selectedItem)) {
@@ -125,27 +112,22 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void deleteSelectedItems (Iterable <String> toggledItems){
-        for (final String item : toggledItems){
-            fileUIArrayList.remove(item);
+    private void deleteSelectedItems (HashSet <String> toggledItems){
+        progressFrame.setVisibility(View.VISIBLE);
+        bus.post(new AccountService.DeleteFileRequest(directory, toggledItems, null));
+    }
+
+    @Subscribe
+    public void onDeleteFile(AccountService.DeleteFileResponse response){
+        HashSet<String> fileNames = response.deletedFiles;
+        Log.d("myLogs", "fileName in onDeleteFile = " + fileNames.size());
+        for (String fileName : fileNames){
+            fileUIArrayList.remove(fileName);
             Toast.makeText(getApplicationContext(),
-                    item + " удален.", Toast.LENGTH_SHORT).show();
-
-            Thread deleteThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mDBApi.delete(directory + item);
-
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            deleteThread.start();
-
+                    fileName + " удален.", Toast.LENGTH_SHORT).show();
         }
-        /*actionMode.finish();*/
+        adapter.notifyDataSetChanged();
+        progressFrame.setVisibility(View.GONE);
     }
 
     private class ItemsActionModeCallback implements ActionMode.Callback{
@@ -196,16 +178,15 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
     }
 
     private void showFile(String fileToShow) {
-        Intent intent = new Intent(getApplicationContext(), VideoPlayer.class);
+        Intent intent = new Intent(this, VideoPlayer.class);
         intent.putExtra("filepath", fileToShow);
         startActivity(intent);
     }
 
-    private class FilesListAdapter extends MyAdapterOld {
+    private class FilesListAdapter extends MyAdapter {
 
-        public FilesListAdapter(Activity activity, ArrayList<String> names, DropboxAPI<AndroidAuthSession> mDBApi, String directory) {
-            super(activity, names, mDBApi, directory);
-
+        public FilesListAdapter(BaseAuthenticatedActivity activity, String directory) {
+            super(activity, directory);
         }
 
         @Override
@@ -217,9 +198,6 @@ public class VideoFilesListActivity extends BaseAuthenticatedActivity {
                 view.setBackground(null);
             }
             return view;
-
         }
     }
-
-
 }

@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.example.bogdan.dropboxphoto.activities.Camera2Activity;
 import com.example.bogdan.dropboxphoto.R;
-import com.example.bogdan.dropboxphoto.VideoActivity;
+import com.example.bogdan.dropboxphoto.activities.VideoActivity;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
 import com.example.bogdan.dropboxphoto.activities.PhotoFilesListActivity;
 import com.example.bogdan.dropboxphoto.activities.VideoFilesListActivity;
@@ -18,19 +18,19 @@ public class MainNavDrawer extends NavDrawer {
         addItem(new ActivityNavDrawerItem(
                 PhotoFilesListActivity.class,
                 "Photo List",
-                R.drawable.ic_launcher,
+                R.drawable.ic_image_black_24dp,
                 R.id.include_main_nav_drawer_topItems));
 
         addItem(new ActivityNavDrawerItem(
                 VideoFilesListActivity.class,
                 "Video List",
-                R.drawable.ic_launcher,
+                R.drawable.ic_camera_roll_black_24dp,
                 R.id.include_main_nav_drawer_topItems
         ));
 
         addItem(new BasicNavDrawerItem(
                 "Make Photo",
-                R.drawable.ic_launcher,
+                R.drawable.ic_add_a_photo_black_24dp,
                 R.id.include_main_nav_drawer_topItems) {
             @Override
             public void onClick(View view) {
@@ -40,7 +40,7 @@ public class MainNavDrawer extends NavDrawer {
 
         addItem(new BasicNavDrawerItem(
                 "Make Video",
-                R.drawable.ic_launcher,
+                R.drawable.ic_videocam_black_24dp,
                 R.id.include_main_nav_drawer_topItems) {
             @Override
             public void onClick(View view) {
@@ -50,7 +50,7 @@ public class MainNavDrawer extends NavDrawer {
 
         addItem(new BasicNavDrawerItem(
                 "Logout",
-                R.drawable.ic_launcher,
+                R.drawable.ic_close_black_24dp,
                 R.id.include_main_nav_drawer_bottomItems) {
 
             @Override

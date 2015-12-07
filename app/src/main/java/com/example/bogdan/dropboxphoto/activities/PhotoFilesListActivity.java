@@ -181,7 +181,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity implements
     }
 
     private void showFile(String fileToShow) {
-        Intent intent = new Intent(getApplicationContext(), PreviewImageActivity.class);
+        Intent intent = new Intent(this, PreviewImageActivity.class);
         intent.putExtra("filepath", fileToShow);
         startActivity(intent);
     }

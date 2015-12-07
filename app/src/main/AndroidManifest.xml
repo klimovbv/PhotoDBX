@@ -42,7 +42,7 @@
 
 
         <activity
-            android:name=".VideoActivity"
+            android:name=".activities.VideoActivity"
             android:label="PhotoToDropBox" >
         </activity>       
         <activity
@@ -60,11 +60,7 @@
         </activity>
 
         <activity
-            android:name=".ListActivityManager"
-            android:label="PhotoToDropBox" >
-        </activity>
-        <activity
-            android:name=".VideoPlayer"
+            android:name=".activities.VideoPlayer"
             android:label="PhotoToDropBox" >
         </activity>
         <activity

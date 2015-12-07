@@ -1,6 +1,8 @@
 package com.example.bogdan.dropboxphoto.services;
 
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
@@ -11,6 +13,9 @@ import com.example.bogdan.dropboxphoto.infrastructure.DbxApplication;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -103,8 +108,6 @@ public final class AccountService {
         public String directory;
         public DeleteFileThread (String directory/*, HashSet<String> fileNames*/) {
             this.directory = directory;
-            /*this.fileNames = fileNames;
-            Log.d("myLogs", "fileName in Thread Constructor = " + this.fileNames.size() + fileNames.size());*/
         }
 
         @Override
@@ -134,6 +137,53 @@ public final class AccountService {
         }
     }
 
+    public static class LoadFileRequest {
+        public String fileName;
+
+        public LoadFileRequest(String fileName) {
+            this.fileName = fileName;
+        }
+    }
+
+    public static class LoadFileResponse {
+        public Uri file;
+    }
+
+
+    @Subscribe
+    public void onLoadFile(LoadFileRequest request){
+        new LoadFileTask().execute(request.fileName);
+    }
+
+    private class LoadFileTask extends AsyncTask<String, Void, Uri>{
+
+        @Override
+        protected Uri doInBackground(String... params) {
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    "testvideo" + params[0]);
+            if (!file.exists()) {
+                try {
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    mDBApi.getFile("/Video/" + params[0], null, outputStream, null);
+                } catch (FileNotFoundException | DropboxException e) {
+                    e.printStackTrace();
+                }
+            }
+            return Uri.parse(file.getAbsolutePath());
+        }
+
+        @Override
+        protected void onPostExecute(Uri uri) {
+            LoadFileResponse response = new LoadFileResponse();
+            response.file = uri;
+            bus.post(response);
+        }
+    }
+
+
+    /*
+
+
     @Subscribe
     public void login (LoginRequest request){
         auth.login();
@@ -144,7 +194,7 @@ public final class AccountService {
     }
 
     public static class LoginResponse{
-    }
+    }*/
 
 
 }

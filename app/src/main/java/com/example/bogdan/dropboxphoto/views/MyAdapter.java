@@ -66,7 +66,7 @@ public class MyAdapter extends BaseAdapter {
                     getItem(position), mDBApi);
             DownloadedDrawable downloadedDrawable = new DownloadedDrawable(loadingThumbAsyncTask);
             holder.thumbnailImage.setBackground(downloadedDrawable);
-            holder.thumbnailImage.setImageResource(R.drawable.ic_camera_alt_black_24dp);
+            holder.thumbnailImage.setImageResource(R.drawable.ic_insert_emoticon_black_24dp);
 
             loadingThumbAsyncTask.execute();
         }
@@ -82,9 +82,6 @@ public class MyAdapter extends BaseAdapter {
             this.fileName = (TextView)view.findViewById(R.id.textViewList);
         }
     }
-
-
-
 
     @Override
     public int getCount() {
