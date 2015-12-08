@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.UploadService;
@@ -32,14 +33,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class Camera2Activity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
+public class CameraActivity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
 
-    private final String PHOTO_DIR = "/Photos/";
+    private static final String PHOTO_DIR = "/Photos/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
-    private static final String TAG = "myLogs";
     private Camera camera;
     private int cameraId;
     private boolean rotate;
@@ -58,62 +58,36 @@ public class Camera2Activity extends BaseAuthenticatedActivity implements Surfac
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_camera);
+
         cameraId = 1;
         identificator = 0;
+        rotate = false;
+        orientation = PORTRAIT_UP;
+
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
         if (Camera.getNumberOfCameras() < 2) {
             buttonChangeCamera.setVisibility(View.INVISIBLE);
         }
+
         surface = (SurfaceView) findViewById(R.id.surfaceView);
         holder = surface.getHolder();
         holder.setFormat(PixelFormat.TRANSPARENT);
         holder.addCallback(this);
-        rotate = false;
-        orientation = PORTRAIT_UP;
+
         int sensorType = Sensor.TYPE_GRAVITY;
-        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(orientationListener, sensorManager.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
     final SensorEventListener orientationListener = new SensorEventListener() {
+        View[] views = {buttonPhoto, buttonChangeCamera};
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 float x = event.values[0];
                 float y = event.values[1];
-
-                if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
-                    if (y >= 0) {
-                        if (orientation != PORTRAIT_UP) {
-                            buttonPhoto.setRotation(0);
-                            buttonChangeCamera.setRotation(0);
-                            orientation = PORTRAIT_UP;
-                        }
-                    }
-                    else {
-                        if (orientation != PORTRAIT_DOWN) {
-                            buttonPhoto.setRotation(180);
-                            buttonChangeCamera.setRotation(180);
-                            orientation = PORTRAIT_DOWN;
-                        }
-                    }
-                } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
-                    if (x >=0) {
-                        if (orientation != LANDSCAPE_LEFT) {
-                            buttonPhoto.setRotation(90);
-                            buttonChangeCamera.setRotation(90);
-                            orientation = LANDSCAPE_LEFT;
-                        }
-                    }
-                    else {
-                        if (orientation != LANDSCAPE_RIGHT){
-                            buttonPhoto.setRotation(270);
-                            buttonChangeCamera.setRotation(270);
-                            orientation = LANDSCAPE_RIGHT;
-                        }
-                    }
-                }
+                orientation = new Utils().settingOrientation(views, orientation, x, y);
             }
         }
 
@@ -125,7 +99,6 @@ public class Camera2Activity extends BaseAuthenticatedActivity implements Surfac
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (camera == null) {
-            Log.d(TAG, "camera == null");
             camera = Camera.open(cameraId);
             Camera.Parameters params = camera.getParameters();
             if (params.getSupportedFocusModes().contains(
@@ -135,11 +108,13 @@ public class Camera2Activity extends BaseAuthenticatedActivity implements Surfac
             }
             camera.setDisplayOrientation(90);
         }
+
         try {
             camera.setPreviewDisplay(holder);
         } catch (IOException e) {
-            Log.d(TAG, "IO Exception" + e);
+            Toast.makeText(CameraActivity.this, "Couldn't attach camera", Toast.LENGTH_SHORT).show();
         }
+
         LayoutParams lpr = layoutParams(surface);
         surface.setLayoutParams(lpr);
         camera.startPreview();
@@ -227,14 +202,12 @@ public class Camera2Activity extends BaseAuthenticatedActivity implements Surfac
                     FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
-                    Intent intent = new Intent (Camera2Activity.this, UploadService.class);
+                    Intent intent = new Intent (CameraActivity.this, UploadService.class);
                     intent.putExtra("filePath", fileName);
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File  Not Found!!!", e);
                 } catch (IOException e) {
-                    Log.d(TAG, "IO Exception", e);
+                    Toast.makeText(CameraActivity.this, "Error while saving file", Toast.LENGTH_SHORT).show();
                 }
             }
         });

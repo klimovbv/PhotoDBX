@@ -36,7 +36,7 @@
         </activity>
         <activity
 
-            android:name=".activities.Camera2Activity"
+            android:name=".activities.CameraActivity"
             android:label="PhotoToDropBox" >
         </activity>
 

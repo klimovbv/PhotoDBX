@@ -34,7 +34,7 @@
         android:src="@drawable/ic_switch_camera_white_24dp"
         android:onClick="onClickChangeCamera"/>
 
-    <ImageButton
+     <ImageButton
         android:layout_width="55dp"
         android:layout_height="55dp"
         android:background="@drawable/round_button"

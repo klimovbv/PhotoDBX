@@ -20,6 +20,7 @@ public abstract class BaseAuthenticatedActivity extends BaseActivity {
             finish();
             return;
         }
+
         mDBApi = application.getAuth().getmDBApi();
         onDbxAppCreate(savedInstanceState);
     }

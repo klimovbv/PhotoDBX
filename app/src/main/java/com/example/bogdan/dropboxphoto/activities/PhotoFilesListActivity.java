@@ -130,7 +130,7 @@ public class PhotoFilesListActivity extends BaseAuthenticatedActivity implements
 
     @Override
     public void onClick(View v) {
-        startActivity(new Intent(this, Camera2Activity.class));
+        startActivity(new Intent(this, CameraActivity.class));
     }
 
     private class ItemsActionModeCallback implements ActionMode.Callback{
