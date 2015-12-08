@@ -16,6 +16,7 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -179,6 +180,51 @@ public final class AccountService {
             bus.post(response);
         }
     }
+
+    public static class LoadPhotoRequest {
+        public String fileName;
+
+        public LoadPhotoRequest(String fileName) {
+            this.fileName = fileName;
+        }
+    }
+
+    public static class LoadPhotoResponse {
+        public Uri fileName;
+    }
+
+    @Subscribe
+    public void onLoadPhotoRequest(LoadPhotoRequest request){
+        new LoadPhotoTask().execute(request.fileName);
+    }
+
+    public class LoadPhotoTask extends AsyncTask<String, Void, Uri>{
+
+        @Override
+        protected Uri doInBackground(String... params) {
+            File thumbnailFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                    "testthumb" + System.currentTimeMillis() + ".jpg");
+            try {FileOutputStream outputStream = new FileOutputStream(thumbnailFile);
+                mDBApi.getFile("/Photos/" + params[0],
+                        null, outputStream, null);
+                mDBApi.getThumbnailStream("/Photos/" + params[0], DropboxAPI.ThumbSize.BESTFIT_640x480, DropboxAPI.ThumbFormat.JPEG);
+                outputStream.close();
+            } catch (DropboxException | IOException e) {
+                e.printStackTrace();
+            }
+            return Uri.parse(thumbnailFile.getAbsolutePath());
+        }
+
+        @Override
+        protected void onPostExecute(Uri uri) {
+            LoadPhotoResponse response = new LoadPhotoResponse();
+            response.fileName = uri;
+            bus.post(response);
+        }
+    }
+
+
+
 
 
     /*

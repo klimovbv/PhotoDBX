@@ -4,27 +4,17 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.exception.DropboxException;
 import com.example.bogdan.dropboxphoto.R;
-import com.example.bogdan.dropboxphoto.activities.BaseAuthenticatedActivity;
 import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.TouchImageView;
 import com.squareup.otto.Subscribe;
-
-import java.io.File;
-import java.io.IOException;
 
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
@@ -34,14 +24,10 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     public static final int REQUEST_PHOTO_DELETE = 100;
     public static final String RESULT_EXTRA_PHOTO = "RESULT_EXTRA_PHOTO";
     private String filePath;
-    private File thumbnailFile;
-    private String thumbnailFileName;
-    private String fileName;
-    private Bitmap bitmap;
-    private Handler handler;
     private TouchImageView imageView;
     private String directory;
     private View progressFrame;
+    private Uri fileUri;
 
 
 
@@ -50,11 +36,12 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
         setContentView(R.layout.activity_preview_photo);
         Intent intent = getIntent();
 
+
         filePath = intent.getStringExtra("filepath");
         directory = "/Photos/";
         imageView = (TouchImageView)findViewById(R.id.imageView);
         progressFrame = findViewById(R.id.activity_preview_photo_progressFrame);
-        progressFrame.setVisibility(View.GONE);
+        progressFrame.setVisibility(View.VISIBLE);
 
         toolbar.setNavigationIcon(R.drawable.ic_ab_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -64,33 +51,14 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        handler = new Handler(){
-            public void handleMessage(Message msg){
-                changeContent();
-            }
-        };
-        Thread previewThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        bus.post(new AccountService.LoadFileRequest(filePath));
+    }
 
-                DropboxAPI.DropboxInputStream dis;
-                fileName = "testthumb" + System.currentTimeMillis() + ".jpg";
-                thumbnailFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                        fileName);
-                thumbnailFileName = thumbnailFile.getAbsolutePath();
-                Log.d("myLogs", "thumbFileName  = " + thumbnailFileName);
-                try {
-                    dis = mDBApi.getThumbnailStream("/Photos/" + filePath,
-                            DropboxAPI.ThumbSize.BESTFIT_1024x768, DropboxAPI.ThumbFormat.JPEG);
-                    bitmap = BitmapFactory.decodeStream(dis);
-                    dis.close();
-                } catch (DropboxException | IOException e) {
-                    e.printStackTrace();
-                }
-                handler.sendEmptyMessage(0);
-            }
-        });
-        previewThread.start();
+    @Subscribe
+    public void onImageLoaded(AccountService.LoadFileResponse response){
+        progressFrame.setVisibility(View.GONE);
+        fileUri = response.file;
+        changeContent();
     }
 
     @Override
@@ -101,7 +69,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     }
 
     private void changeContent() {
-        imageView.setImageBitmap(bitmap);
+        imageView.setImageURI(fileUri);
     }
 
     @Override
