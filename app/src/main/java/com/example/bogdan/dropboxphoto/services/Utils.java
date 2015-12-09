@@ -1,11 +1,12 @@
 package com.example.bogdan.dropboxphoto.services;
 
 import android.content.Context;
-import android.text.format.DateUtils;
 import android.view.View;
+import android.widget.ImageButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 
 public class Utils {
@@ -20,18 +21,18 @@ public class Utils {
         return dateFormat.format(currentDate);
     }
 
-    public int settingOrientation(View[] views, int orientation, float x, float y){
+    public int settingOrientation(HashSet<ImageButton> buttons, int orientation, float x, float y){
         if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
             if (y >= 0) {
                 if (orientation != PORTRAIT_UP) {
-                    for (View view : views) {
+                    for (View view : buttons) {
                         view.setRotation(0);
                     }
                     orientation = PORTRAIT_UP;
                 }
             } else {
                 if (orientation != PORTRAIT_DOWN) {
-                    for (View view : views) {
+                    for (View view : buttons) {
                         view.setRotation(180);
                     }
                     orientation = PORTRAIT_DOWN;
@@ -40,14 +41,14 @@ public class Utils {
         } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
             if (x >=0) {
                 if (orientation != LANDSCAPE_LEFT) {
-                    for (View view : views) {
+                    for (View view : buttons) {
                         view.setRotation(90);
                     }
                     orientation = LANDSCAPE_LEFT;
                 }
             } else {
                 if (orientation != LANDSCAPE_RIGHT){
-                    for (View view : views) {
+                    for (View view : buttons) {
                         view.setRotation(270);
                     }
                     orientation = LANDSCAPE_RIGHT;

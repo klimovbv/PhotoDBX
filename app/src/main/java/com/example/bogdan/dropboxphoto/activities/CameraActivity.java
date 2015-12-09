@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Sensor;
@@ -16,78 +15,115 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.UploadService;
 import com.example.bogdan.dropboxphoto.services.Utils;
+import com.example.bogdan.dropboxphoto.views.CameraPreview;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 
-public class CameraActivity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
+public class CameraActivity extends BaseAuthenticatedActivity {
 
     private static final String PHOTO_DIR = "/Photos/";
     private static final int PORTRAIT_UP = 1;
     private static final int PORTRAIT_DOWN = 2;
     private static final int LANDSCAPE_LEFT = 3;
     private static final int LANDSCAPE_RIGHT = 4;
+    private static final String TAG = "CameraActivity";
     private Camera camera;
-    private int cameraId;
     private boolean rotate;
     private int  orientation;
-    private int widthForCamera, heightForCamera;
-    private int identificator;
-    private int firstHeight, firstWidth;
-    private SurfaceHolder holder;
-    private SurfaceView surface;
     private File photoFile;
     private String fileName;
     private ImageButton buttonPhoto, buttonChangeCamera;
+    private HashSet <ImageButton> buttons;
+    private int currentCameraIndex;
+    private CameraPreview cameraPreview;
+    private Camera.CameraInfo cameraInfo;
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_camera);
-
-        cameraId = 1;
-        identificator = 0;
-        rotate = false;
+        currentCameraIndex = 0;
         orientation = PORTRAIT_UP;
+        rotate = false;
 
+        cameraPreview = new CameraPreview(this);
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.activity_camera_frameLayout);
+        frameLayout.addView(cameraPreview, 0);
+
+        buttons = new HashSet<ImageButton>();
         buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
         buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
+        buttons.add(buttonPhoto);
+        buttons.add(buttonChangeCamera);
+
         if (Camera.getNumberOfCameras() < 2) {
             buttonChangeCamera.setVisibility(View.INVISIBLE);
         }
-
-        surface = (SurfaceView) findViewById(R.id.surfaceView);
-        holder = surface.getHolder();
-        holder.setFormat(PixelFormat.TRANSPARENT);
-        holder.addCallback(this);
 
         int sensorType = Sensor.TYPE_GRAVITY;
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensorManager.registerListener(orientationListener, sensorManager.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        establishCamera();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (camera != null) {
+            cameraPreview.setCamera(null, null);
+            camera.release();
+            camera = null;
+        }
+    }
+
+    private void establishCamera() {
+        if (camera != null) {
+            cameraPreview.setCamera(null, null);
+            camera.release();
+            camera = null;
+        }
+
+        try {
+            camera = Camera.open(currentCameraIndex);
+        } catch (Exception e){
+            Log.e(TAG, "Could not open camera " + currentCameraIndex, e);
+            Toast.makeText(this, "Error establishing camera!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(currentCameraIndex, cameraInfo);
+        cameraPreview.setCamera(camera, cameraInfo);
+    }
+
     final SensorEventListener orientationListener = new SensorEventListener() {
-        View[] views = {buttonPhoto, buttonChangeCamera};
+
         @Override
         public void onSensorChanged(SensorEvent event) {
             if(event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 float x = event.values[0];
                 float y = event.values[1];
-                orientation = new Utils().settingOrientation(views, orientation, x, y);
+                orientation = new Utils().settingOrientation(buttons, orientation, x, y);
             }
         }
 
@@ -95,64 +131,6 @@ public class CameraActivity extends BaseAuthenticatedActivity implements Surface
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        if (camera == null) {
-            camera = Camera.open(cameraId);
-            Camera.Parameters params = camera.getParameters();
-            if (params.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                camera.setParameters(params);
-            }
-            camera.setDisplayOrientation(90);
-        }
-
-        try {
-            camera.setPreviewDisplay(holder);
-        } catch (IOException e) {
-            Toast.makeText(CameraActivity.this, "Couldn't attach camera", Toast.LENGTH_SHORT).show();
-        }
-
-        LayoutParams lpr = layoutParams(surface);
-        surface.setLayoutParams(lpr);
-        camera.startPreview();
-    }
-
-    private LayoutParams layoutParams (SurfaceView surfaceView) {
-        LayoutParams lp = surfaceView.getLayoutParams();
-        if (identificator == 0) {
-            firstHeight = surfaceView.getHeight();
-            firstWidth = surfaceView.getWidth();
-            identificator = 1;
-        }
-        Camera.Parameters parameters = camera.getParameters();
-        Camera.Size cameraSize = parameters.getPreviewSize();
-        getSizeForCamera(firstHeight, firstWidth,
-                cameraSize.width, cameraSize.height);
-        lp.height = heightForCamera;
-        lp.width = widthForCamera;
-        return lp;
-    }
-    private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
-                                  int cameraHeight, int cameraWidth){
-        float scale = Math.min((float)surfaceHeight/(float)cameraHeight,
-                (float)surfaceWidth/(float)cameraWidth);
-        widthForCamera = (int)((float)cameraWidth*scale);
-        heightForCamera = (int)((float)cameraHeight*scale);
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-    }
 
     public void onClickPhoto(View view) {
         int angle = 0;
@@ -183,26 +161,26 @@ public class CameraActivity extends BaseAuthenticatedActivity implements Surface
         camera.takePicture(null, null, new PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0 , bytes.length);
-                if (rotate){
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                if (rotate) {
                     int angle = 0;
-                    switch (cameraId){
+                    switch (currentCameraIndex) {
                         case 0:
-                            angle = 90+i;
+                            angle = 90 + i;
                             break;
                         case 1:
-                            angle = 270-i;
+                            angle = 270 - i;
                             break;
                     }
                     bitmap = RotateBitmap(bitmap, angle);
                 }
-                surfaceDestroyed(holder);
-                surfaceCreated(holder);
+                /*surfaceDestroyed(holder);
+                surfaceCreated(holder);*/
                 try {
                     FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
-                    Intent intent = new Intent (CameraActivity.this, UploadService.class);
+                    Intent intent = new Intent(CameraActivity.this, UploadService.class);
                     intent.putExtra("filePath", fileName);
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
@@ -214,15 +192,8 @@ public class CameraActivity extends BaseAuthenticatedActivity implements Surface
     }
 
     public void onClickChangeCamera(View view) {
-        if (cameraId == 0) {
-            cameraId = 1;
-        } else {
-            cameraId = 0;
-        }
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-        surfaceCreated(holder);
+        currentCameraIndex = currentCameraIndex + 1 < Camera.getNumberOfCameras() ? currentCameraIndex +1 : 0;
+        establishCamera();
     }
 
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -232,18 +203,4 @@ public class CameraActivity extends BaseAuthenticatedActivity implements Surface
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 }
