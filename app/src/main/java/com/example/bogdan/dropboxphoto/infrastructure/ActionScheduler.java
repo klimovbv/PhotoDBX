@@ -10,8 +10,8 @@ public class ActionScheduler {
     private final ArrayList<TimedCallback> timedCallbacks;
     private boolean isPaused;
 
-    public ActionScheduler(DbxApplication applicationl) {
-        this.applicationl = applicationl;
+    public ActionScheduler(DbxApplication application) {
+        this.applicationl = application;
         handler = new Handler();
         timedCallbacks = new ArrayList<>();
     }
@@ -28,10 +28,6 @@ public class ActionScheduler {
         }
     }
 
-    public void postDelayed(Runnable runnable, long milliseconds){
-        handler.postDelayed(runnable, milliseconds);
-    }
-
     public void postEveryMilliseconds(final Object request, long milliseconds){
         TimedCallback callback = new TimedCallback(new Runnable() {
             @Override
@@ -41,7 +37,6 @@ public class ActionScheduler {
         }, milliseconds);
         timedCallbacks.add(callback);
         callback.run();
-        postDelayed(callback, milliseconds);
     }
 
 
