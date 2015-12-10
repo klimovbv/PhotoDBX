@@ -96,7 +96,6 @@ public class VideoPlayer extends BaseAuthenticatedActivity {
     @Subscribe
     public void onImageDeleted(AccountService.DeleteFileResponse response){
         progressFrame.setVisibility(View.GONE);
-        /*Toast.makeText(this, response.deletedFiles.toString() + " deleted", Toast.LENGTH_SHORT).show();*/
         finish();
     }
 

@@ -19,8 +19,6 @@ import com.squareup.otto.Subscribe;
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
 
-    private boolean isRegisteredWithBus;
-
     public static final int REQUEST_PHOTO_DELETE = 100;
     public static final String RESULT_EXTRA_PHOTO = "RESULT_EXTRA_PHOTO";
     private String filePath;
@@ -29,13 +27,10 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     private View progressFrame;
     private Uri fileUri;
 
-
-
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_preview_photo);
         Intent intent = getIntent();
-
 
         filePath = intent.getStringExtra("filepath");
         directory = "/Photos/";
@@ -109,7 +104,6 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     @Subscribe
     public void onImageDeleted(AccountService.DeleteFileResponse response){
         progressFrame.setVisibility(View.GONE);
-        /*Toast.makeText(this, response.deletedFiles.toString() + " deleted", Toast.LENGTH_SHORT).show();*/
         closeMessage(REQUEST_PHOTO_DELETE);
     }
 }

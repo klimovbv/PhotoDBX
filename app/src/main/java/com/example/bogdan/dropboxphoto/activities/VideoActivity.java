@@ -3,7 +3,6 @@ package com.example.bogdan.dropboxphoto.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,18 +16,20 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.UploadService;
 import com.example.bogdan.dropboxphoto.services.Utils;
+import com.example.bogdan.dropboxphoto.views.CameraPreview;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashSet;
 
-public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceHolder.Callback {
+public class VideoActivity extends BaseAuthenticatedActivity {
 
     private static final String VIDEO_DIR = "/Video/";
     private static final int PORTRAIT_UP = 1;
@@ -49,24 +50,40 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
     private ImageButton buttonRecord, buttonChangeCamera;
     private boolean isRecord;
 
+    private Camera.CameraInfo cameraInfo;
+    private static int currentCameraIndex;
+    private static CameraPreview cameraPreview;
+    private static HashSet<ImageButton> buttons;
+
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_video);
-        buttonRecord = (ImageButton) findViewById(R.id.record_button);
-        buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
-        surface = (SurfaceView) findViewById(R.id.surfaceViewVideo);
-        holder = surface.getHolder();
-        holder.addCallback(this);
-        holder.setFormat(PixelFormat.TRANSPARENT);
-        cameraId = 0;
-        identificator = 0;
+
+        currentCameraIndex = 0;
         orientation = PORTRAIT_UP;
         angle = 90;
+
+        cameraPreview = new CameraPreview(this);
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.activity_video_frameLayout);
+        frameLayout.addView(cameraPreview, 0);
+
+
+        buttonRecord = (ImageButton) findViewById(R.id.record_button);
+        buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
+        buttons = new HashSet<>();
+        buttons.add(buttonRecord);
+        buttons.add(buttonChangeCamera);
+
+        if (Camera.getNumberOfCameras() < 2) {
+            buttonChangeCamera.setVisibility(View.INVISIBLE);
+        }
+
         int sensorType = Sensor.TYPE_GRAVITY;
-        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sm.registerListener(orientationListener, sm.getDefaultSensor(sensorType),
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(orientationListener, sensorManager.getDefaultSensor(sensorType),
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
 
@@ -76,40 +93,7 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
             if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
                 float x = event.values[0];
                 float y = event.values[1];
-                if (Math.abs(x) <= 5 && Math.abs(y) >= 5) {
-                    if (y >= 0) {
-                        if (orientation == PORTRAIT_UP) {
-                        } else {
-                            orientation = PORTRAIT_UP;
-                            buttonRecord.setRotation(0);
-                            buttonChangeCamera.setRotation(0);
-                        }
-                    } else {
-                        if (orientation == PORTRAIT_DOWN) {
-                        } else {
-                            orientation = PORTRAIT_DOWN;
-                            buttonRecord.setRotation(180);
-                            buttonChangeCamera.setRotation(180);
-                        }
-                    }
-
-                } else if (Math.abs(x) > 5 && Math.abs(y) < 5) {
-                    if (x >= 0) {
-                        if (orientation == LANDSCAPE_LEFT) {
-                        } else {
-                            orientation = LANDSCAPE_LEFT;
-                            buttonRecord.setRotation(90);
-                            buttonChangeCamera.setRotation(90);
-                        }
-                    } else {
-                        if (orientation == LANDSCAPE_RIGHT) {
-                        } else {
-                            orientation = LANDSCAPE_RIGHT;
-                            buttonRecord.setRotation(270);
-                            buttonChangeCamera.setRotation(270);
-                        }
-                    }
-                }
+                orientation = new Utils().settingOrientation(buttons, orientation, x, y);
             }
         }
 
@@ -119,95 +103,61 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
     };
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-        if (camera == null) {
-            Log.d(TAG, "camera == null");
-            camera = Camera.open(cameraId);
-            Camera.Parameters params = camera.getParameters();
-            if (params.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                camera.setParameters(params);
-            }
-            camera.setDisplayOrientation(90);
-        }
-        else {
-            Log.d(TAG, "camera opened");
-        }
-        try {
-            LayoutParams lpr = layoutParams(surface);
-            surface.setLayoutParams(lpr);
-            camera.setPreviewDisplay(holder);
-        } catch (IOException e) {
-            Log.d(TAG, "IO Exception" + e);
-        }
-
-        camera.startPreview();
-    }
-
-    //вынести в отдельный класс
-    private LayoutParams layoutParams (SurfaceView surfaceView) {
-        LayoutParams lp = surfaceView.getLayoutParams();
-        if (identificator == 0) {
-            firstHeight = surfaceView.getHeight();
-            firstWidth = surfaceView.getWidth();
-            identificator = 1;
-        }
-        Camera.Parameters parameters = camera.getParameters();
-        Camera.Size cameraSize = parameters.getPreviewSize();
-        getSizeForCamera(firstHeight, firstWidth,
-                cameraSize.width, cameraSize.height);
-        lp.height = heightForCamera;
-        lp.width = widthForCamera;
-        /*parameters.setPreviewSize(heightForCamera, widthForCamera);
-        camera.setParameters(parameters);*/
-        return lp;
-    }
-    private void getSizeForCamera(int surfaceHeight, int surfaceWidth,
-                                  int cameraHeight, int cameraWidth){
-        float scale = Math.min((float) surfaceHeight / (float) cameraHeight,
-                (float) surfaceWidth / (float) cameraWidth);
-        widthForCamera = (int)((float)cameraWidth*scale);
-        heightForCamera = (int)((float)cameraHeight*scale);
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int i, int i2, int i3) {
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-    }
-
-   /* @Override
     protected void onResume() {
         super.onResume();
-        camera = Camera.open();
-    }*/
+        establishCamera();
+        isRecord = false;
+        buttonRecord.setImageResource(R.drawable.ic_videocam_white_24dp);
+        if (Camera.getNumberOfCameras() > 1) {
+            buttonChangeCamera.setVisibility(View.VISIBLE);
+        }
+    }
 
-    /*@Override
+    @Override
     protected void onPause() {
         super.onPause();
-        releaseMediaRecorder();
-        if (camera != null)
+
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            releaseMediaRecorder();
+            Intent intent = new Intent (VideoActivity.this, UploadService.class);
+            intent.putExtra("filePath",videoFile.getAbsolutePath());
+            intent.putExtra("dirPath", VIDEO_DIR);
+            startService(intent);
+        }
+    }
+
+    private void establishCamera() {
+        if (camera != null){
+            cameraPreview.setCamera(null, null);
             camera.release();
-        camera = null;
-    }*/
+            camera = null;
+        }
+
+        try {
+            camera = Camera.open(currentCameraIndex);
+        } catch (Exception e){
+            Log.e(TAG, "Could not open camera " + currentCameraIndex, e);
+            Toast.makeText(this, "Error establishing camera!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Camera.Parameters params = camera.getParameters();
+        if (params.getSupportedFocusModes().contains(
+                Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            camera.setParameters(params);
+        }
+        camera.setDisplayOrientation(90);
+        cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(currentCameraIndex, cameraInfo);
+        cameraPreview.setCamera(camera, cameraInfo);
+
+    }
 
     public void onClickChangeCamera(View view) {
-        if (cameraId == 0) {
-            cameraId = 1;
-        } else {
-            cameraId = 0;
-        }
-        camera.stopPreview();
-        camera.release();
-        camera = null;
-        surfaceCreated(holder);
+        currentCameraIndex = currentCameraIndex + 1 < Camera.getNumberOfCameras() ? currentCameraIndex + 1 : 0;
+        establishCamera();
     }
 
        private void releaseMediaRecorder() {
@@ -217,6 +167,12 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
             mediaRecorder = null;
             camera.lock();
         }
+
+           if (camera != null) {
+               cameraPreview.setCamera(null, null);
+               camera.release();
+               camera = null;
+           }
     }
 
     public void onClickVideo (View view) {
@@ -248,6 +204,7 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
             }
             mediaRecorder.stop();
             releaseMediaRecorder();
+            establishCamera();
             Intent intent = new Intent (VideoActivity.this, UploadService.class);
             intent.putExtra("filePath",videoFile.getAbsolutePath());
             intent.putExtra("dirPath", VIDEO_DIR);
@@ -255,6 +212,8 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
         }
     }
     private boolean prepareVideoRecorder() {
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size cameraSize = parameters.getPreviewSize();
         camera.unlock();
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setCamera(camera);
@@ -263,7 +222,7 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
         mediaRecorder.setProfile(CamcorderProfile
                 .get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
-        mediaRecorder.setVideoSize(heightForCamera, widthForCamera);
+        mediaRecorder.setVideoSize(cameraSize.width, cameraSize.height);
         if (cameraId == 0) {
             switch (orientation){
                 case PORTRAIT_UP:
@@ -306,33 +265,14 @@ public class VideoActivity extends BaseAuthenticatedActivity implements SurfaceH
         return true;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mediaRecorder != null) {
-            mediaRecorder.stop();
-            releaseMediaRecorder();
-            Intent intent = new Intent (VideoActivity.this, UploadService.class);
-            intent.putExtra("filePath",videoFile.getAbsolutePath());
-            intent.putExtra("dirPath", VIDEO_DIR);
-            startService(intent);
-        }
-    }
+
 
     @Override
     protected void onStop() {
         super.onStop();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isRecord = false;
-        buttonRecord.setImageResource(R.drawable.ic_videocam_white_24dp);
-        if (Camera.getNumberOfCameras() > 1) {
-            buttonChangeCamera.setVisibility(View.VISIBLE);
-        }
-    }
+
 }
 
 

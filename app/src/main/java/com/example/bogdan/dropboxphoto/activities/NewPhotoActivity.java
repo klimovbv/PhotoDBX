@@ -31,7 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 
-public class CameraActivity extends BaseAuthenticatedActivity {
+public class NewPhotoActivity extends BaseAuthenticatedActivity {
 
     private static final String PHOTO_DIR = "/Photos/";
     private static final int PORTRAIT_UP = 1;
@@ -110,7 +110,13 @@ public class CameraActivity extends BaseAuthenticatedActivity {
             Toast.makeText(this, "Error establishing camera!", Toast.LENGTH_LONG).show();
             return;
         }
-
+        Camera.Parameters params = camera.getParameters();
+        if (params.getSupportedFocusModes().contains(
+                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            camera.setParameters(params);
+        }
+        camera.setDisplayOrientation(90);
         cameraInfo = new Camera.CameraInfo();
         Camera.getCameraInfo(currentCameraIndex, cameraInfo);
         cameraPreview.setCamera(camera, cameraInfo);
@@ -174,25 +180,24 @@ public class CameraActivity extends BaseAuthenticatedActivity {
                     }
                     bitmap = RotateBitmap(bitmap, angle);
                 }
-                /*surfaceDestroyed(holder);
-                surfaceCreated(holder);*/
+                establishCamera();
                 try {
                     FileOutputStream outStream = new FileOutputStream(photoFile);
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
-                    Intent intent = new Intent(CameraActivity.this, UploadService.class);
+                    Intent intent = new Intent(NewPhotoActivity.this, UploadService.class);
                     intent.putExtra("filePath", fileName);
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
                 } catch (IOException e) {
-                    Toast.makeText(CameraActivity.this, "Error while saving file", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewPhotoActivity.this, "Error while saving file", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     public void onClickChangeCamera(View view) {
-        currentCameraIndex = currentCameraIndex + 1 < Camera.getNumberOfCameras() ? currentCameraIndex +1 : 0;
+        currentCameraIndex = currentCameraIndex + 1 < Camera.getNumberOfCameras() ? currentCameraIndex + 1 : 0;
         establishCamera();
     }
 

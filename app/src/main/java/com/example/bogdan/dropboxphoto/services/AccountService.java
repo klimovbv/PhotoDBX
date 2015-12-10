@@ -91,6 +91,7 @@ public final class AccountService {
 
     @Subscribe
     public void onLoadFileListRequest(LoadFileListRequest request) {
+        Log.d("myLogs", "----LoadFileListRequest -----" + request.directory);
         new ListLoadingThread().execute(request.directory);
     }
 
