@@ -26,17 +26,19 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
     protected FilesListAdapter adapter;
 
     protected String directory;
-    protected ImageButton newPhotoButton;
+    protected ImageButton newFileButton;
 
     protected ActionMode actionMode;
     protected HashSet<String> selectedFiles;
     protected String selectedItem;
     protected View progressFrame;
     protected Class showFileActivity;
+    protected Class makeFileActivity;
 
-    public BaseFilesListActivity(String directory, Class showFileActivity) {
+    public BaseFilesListActivity(String directory, Class showFileActivity, Class makeFileActivity) {
         this.directory = directory;
         this.showFileActivity = showFileActivity;
+        this.makeFileActivity = makeFileActivity;
     }
 
     @Override
@@ -45,10 +47,15 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
 
         setNavdrawer(new MainNavDrawer(this));
         getSupportActionBar().setTitle(directory);
-        newPhotoButton = (ImageButton) findViewById(R.id.activity_file_list_newPhotoButton);
+
+        newFileButton = (ImageButton) findViewById(R.id.activity_file_list_newPhotoButton);
+        if (directory.equals("/Video/")){
+            newFileButton.setImageResource(R.drawable.ic_videocam_white_24dp);
+        }
+
         progressFrame = findViewById(R.id.activity_file_list_progressFrame);
         progressFrame.setVisibility(View.VISIBLE);
-        newPhotoButton.setOnClickListener(this);
+        newFileButton.setOnClickListener(this);
         selectedFiles = new HashSet<>();
 
         adapter = new FilesListAdapter(this, directory);
@@ -75,7 +82,8 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
                 return true;
             }
         });
-        bus.post(new AccountService.LoadFileListRequest(directory));
+
+        scheduler.postEveryMilliseconds(new AccountService.LoadFileListRequest(directory), 1000*5);
     }
 
     protected void attachLoadedFileList (ArrayList<String> loadedFileList){
@@ -123,7 +131,7 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
 
     @Override
     public void onClick(View v) {
-        startActivity(new Intent(this, NewPhotoActivity.class));
+        startActivity(new Intent(this, makeFileActivity));
     }
 
     protected class ItemsActionModeCallback implements ActionMode.Callback{

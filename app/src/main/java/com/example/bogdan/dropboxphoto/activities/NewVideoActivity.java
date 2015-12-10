@@ -13,8 +13,6 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -29,7 +27,7 @@ import com.example.bogdan.dropboxphoto.views.CameraPreview;
 import java.io.File;
 import java.util.HashSet;
 
-public class VideoActivity extends BaseAuthenticatedActivity {
+public class NewVideoActivity extends BaseAuthenticatedActivity {
 
     private static final String VIDEO_DIR = "/Video/";
     private static final int PORTRAIT_UP = 1;
@@ -38,13 +36,7 @@ public class VideoActivity extends BaseAuthenticatedActivity {
     private static final int LANDSCAPE_RIGHT = 4;
     private static final String TAG = "myLogs";
     private Camera camera;
-    private int cameraId;
     private int orientation, angle;
-    private int widthForCamera, heightForCamera;
-    private int identificator;
-    private int firstHeight, firstWidth;
-    private SurfaceHolder holder;
-    private SurfaceView surface;
     private MediaRecorder mediaRecorder;
     private File videoFile;
     private ImageButton buttonRecord, buttonChangeCamera;
@@ -69,7 +61,6 @@ public class VideoActivity extends BaseAuthenticatedActivity {
 
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.activity_video_frameLayout);
         frameLayout.addView(cameraPreview, 0);
-
 
         buttonRecord = (ImageButton) findViewById(R.id.record_button);
         buttonChangeCamera = (ImageButton) findViewById(R.id.change_button);
@@ -120,19 +111,29 @@ public class VideoActivity extends BaseAuthenticatedActivity {
         if (mediaRecorder != null) {
             mediaRecorder.stop();
             releaseMediaRecorder();
-            Intent intent = new Intent (VideoActivity.this, UploadService.class);
-            intent.putExtra("filePath",videoFile.getAbsolutePath());
-            intent.putExtra("dirPath", VIDEO_DIR);
-            startService(intent);
+            startUploadFile();
         }
+
+        clearCamera();
     }
 
-    private void establishCamera() {
+    private void startUploadFile(){
+        Intent intent = new Intent (NewVideoActivity.this, UploadService.class);
+        intent.putExtra("filePath",videoFile.getAbsolutePath());
+        intent.putExtra("dirPath", VIDEO_DIR);
+        startService(intent);
+    }
+
+    private void clearCamera(){
         if (camera != null){
             cameraPreview.setCamera(null, null);
             camera.release();
             camera = null;
         }
+    }
+
+    private void establishCamera() {
+        clearCamera();
 
         try {
             camera = Camera.open(currentCameraIndex);
@@ -165,14 +166,10 @@ public class VideoActivity extends BaseAuthenticatedActivity {
             mediaRecorder.reset();
             mediaRecorder.release();
             mediaRecorder = null;
-            camera.lock();
+            /*camera.reconnect();*/
         }
 
-           if (camera != null) {
-               cameraPreview.setCamera(null, null);
-               camera.release();
-               camera = null;
-           }
+        clearCamera();
     }
 
     public void onClickVideo (View view) {
@@ -205,10 +202,7 @@ public class VideoActivity extends BaseAuthenticatedActivity {
             mediaRecorder.stop();
             releaseMediaRecorder();
             establishCamera();
-            Intent intent = new Intent (VideoActivity.this, UploadService.class);
-            intent.putExtra("filePath",videoFile.getAbsolutePath());
-            intent.putExtra("dirPath", VIDEO_DIR);
-            startService(intent);
+            startUploadFile();
         }
     }
     private boolean prepareVideoRecorder() {
@@ -223,7 +217,7 @@ public class VideoActivity extends BaseAuthenticatedActivity {
                 .get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setVideoSize(cameraSize.width, cameraSize.height);
-        if (cameraId == 0) {
+        if (currentCameraIndex == 0) {
             switch (orientation){
                 case PORTRAIT_UP:
                     angle = 90;

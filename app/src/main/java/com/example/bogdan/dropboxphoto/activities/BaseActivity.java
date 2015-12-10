@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.example.bogdan.dropboxphoto.R;
+import com.example.bogdan.dropboxphoto.infrastructure.ActionScheduler;
 import com.example.bogdan.dropboxphoto.infrastructure.DbxApplication;
 import com.example.bogdan.dropboxphoto.views.NavDrawer;
 import com.squareup.otto.Bus;
@@ -18,6 +19,9 @@ public class BaseActivity extends ActionBarActivity {
     protected Toolbar toolbar;
     protected NavDrawer navDrawer;
     protected Bus bus;
+    protected ActionScheduler scheduler;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +30,19 @@ public class BaseActivity extends ActionBarActivity {
         bus = application.getBus();
         bus.register(this);
         isRegisteredWithBus = true;
+        scheduler = new ActionScheduler(application);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        scheduler.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        scheduler.onPause();
     }
 
     @Override

@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.example.bogdan.dropboxphoto.activities.NewPhotoActivity;
 import com.example.bogdan.dropboxphoto.R;
-import com.example.bogdan.dropboxphoto.activities.VideoActivity;
+import com.example.bogdan.dropboxphoto.activities.NewVideoActivity;
 import com.example.bogdan.dropboxphoto.activities.BaseActivity;
 import com.example.bogdan.dropboxphoto.activities.PhotoFilesListActivity;
 import com.example.bogdan.dropboxphoto.activities.VideoFilesListActivity;
@@ -44,7 +44,7 @@ public class MainNavDrawer extends NavDrawer {
                 R.id.include_main_nav_drawer_topItems) {
             @Override
             public void onClick(View view) {
-                activity.startActivity(new Intent(activity, VideoActivity.class));
+                activity.startActivity(new Intent(activity, NewVideoActivity.class));
             }
         });
 

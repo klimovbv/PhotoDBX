@@ -42,7 +42,7 @@
 
 
         <activity
-            android:name=".activities.VideoActivity"
+            android:name=".activities.NewVideoActivity"
             android:label="PhotoToDropBox" >
         </activity>       
         <activity

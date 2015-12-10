@@ -8,7 +8,7 @@ import com.squareup.otto.Subscribe;
 public class PhotoFilesListActivity extends BaseFilesListActivity {
 
     public PhotoFilesListActivity() {
-        super("/Photos", PreviewImageActivity.class);
+        super("/Photos/", PreviewImageActivity.class, NewPhotoActivity.class);
     }
 
     @Subscribe

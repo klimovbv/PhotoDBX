@@ -8,7 +8,7 @@ import com.squareup.otto.Subscribe;
 public class VideoFilesListActivity extends BaseFilesListActivity {
 
     public VideoFilesListActivity() {
-        super("/Video/", VideoPlayer.class);
+        super("/Video/", VideoPlayer.class, NewVideoActivity.class);
     }
 
     @Subscribe
