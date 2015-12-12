@@ -1,5 +1,7 @@
 package com.example.bogdan.dropboxphoto.services;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -21,12 +23,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public final class AccountService {
-    private final Auth auth;
     private DropboxAPI<AndroidAuthSession> mDBApi;
     private Bus bus;
+    private DbxApplication application;
 
     public AccountService(DbxApplication application){
-        auth = application.getAuth();
+        this.application = application;
         mDBApi = application.getAuth().getmDBApi();
         bus = application.getBus();
         bus.register(this);
@@ -161,8 +163,8 @@ public final class AccountService {
 
         @Override
         protected Uri doInBackground(String... params) {
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    "testvideo" + params[0]);
+            File file = new File(application.getCacheDir(),
+                    "video_" + params[0]);
             if (!file.exists()) {
                 try {
                     FileOutputStream outputStream = new FileOutputStream(file);
@@ -191,7 +193,7 @@ public final class AccountService {
     }
 
     public static class LoadPhotoResponse {
-        public Uri fileName;
+        public Bitmap fileBitmap;
     }
 
     @Subscribe
@@ -199,49 +201,25 @@ public final class AccountService {
         new LoadPhotoTask().execute(request.fileName);
     }
 
-    public class LoadPhotoTask extends AsyncTask<String, Void, Uri>{
+    public class LoadPhotoTask extends AsyncTask<String, Void, Bitmap>{
 
         @Override
-        protected Uri doInBackground(String... params) {
-            File thumbnailFile = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                    "testthumb" + System.currentTimeMillis() + ".jpg");
-            try {FileOutputStream outputStream = new FileOutputStream(thumbnailFile);
-                mDBApi.getFile("/Photos/" + params[0],
-                        null, outputStream, null);
-                mDBApi.getThumbnailStream("/Photos/" + params[0], DropboxAPI.ThumbSize.BESTFIT_640x480, DropboxAPI.ThumbFormat.JPEG);
-                outputStream.close();
-            } catch (DropboxException | IOException e) {
+        protected Bitmap doInBackground(String... params) {
+            DropboxAPI.DropboxInputStream dis;
+            try {
+                dis = mDBApi.getThumbnailStream("/Photos/" + params[0], DropboxAPI.ThumbSize.BESTFIT_640x480, DropboxAPI.ThumbFormat.JPEG);
+                return BitmapFactory.decodeStream(dis);
+            } catch (DropboxException e) {
                 e.printStackTrace();
             }
-            return Uri.parse(thumbnailFile.getAbsolutePath());
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Uri uri) {
+        protected void onPostExecute(Bitmap bitmap) {
             LoadPhotoResponse response = new LoadPhotoResponse();
-            response.fileName = uri;
+            response.fileBitmap = bitmap;
             bus.post(response);
         }
     }
-
-
-
-
-
-    /*
-
-
-    @Subscribe
-    public void login (LoginRequest request){
-        auth.login();
-    }
-
-
-    public static class LoginRequest {
-    }
-
-    public static class LoginResponse{
-    }*/
-
-
 }

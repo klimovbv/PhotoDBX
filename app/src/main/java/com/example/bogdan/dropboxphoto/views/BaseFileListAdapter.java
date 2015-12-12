@@ -25,18 +25,16 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class MyAdapter extends BaseAdapter {
+public class BaseFileListAdapter extends BaseAdapter {
     private static int backgroundColor;
     private ArrayList<String> fileList;
     private DropboxAPI<AndroidAuthSession> mDBApi;
     private LayoutInflater inflater;
-    private BaseAuthenticatedActivity activity;
     private String directory;
 
-    public MyAdapter(BaseAuthenticatedActivity activity,
-                     String directory) {
+    public BaseFileListAdapter(BaseAuthenticatedActivity activity,
+                               String directory) {
         this.directory  = directory;
-        this.activity = activity;
         fileList = new ArrayList<>();
         inflater = activity.getLayoutInflater();
         backgroundColor = activity.getResources().getColor(R.color.background_list_color);

@@ -166,7 +166,6 @@ public class NewVideoActivity extends BaseAuthenticatedActivity {
             mediaRecorder.reset();
             mediaRecorder.release();
             mediaRecorder = null;
-            /*camera.reconnect();*/
         }
 
         clearCamera();
@@ -178,10 +177,7 @@ public class NewVideoActivity extends BaseAuthenticatedActivity {
             buttonRecord.setImageResource(R.drawable.ic_videocam_white_24dp);
             isRecord = false;
         } else {
-            File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
-            sdPath.mkdir();
-            videoFile = new File(sdPath,
+            videoFile = new File(getCacheDir(),
                     new Utils().makeFileName(getApplicationContext()) + ".3gp");
             if (prepareVideoRecorder()) {
                 mediaRecorder.start();

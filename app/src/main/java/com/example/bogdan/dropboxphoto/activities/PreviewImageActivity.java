@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +18,8 @@ import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.TouchImageView;
 import com.squareup.otto.Subscribe;
 
+import java.io.IOException;
+
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
 
@@ -25,7 +29,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     private TouchImageView imageView;
     private String directory;
     private View progressFrame;
-    private Uri fileUri;
+    private Bitmap bitmap;
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
@@ -46,25 +50,26 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        bus.post(new AccountService.LoadFileRequest(filePath));
+        bus.post(new AccountService.LoadPhotoRequest(filePath));
     }
 
     @Subscribe
-    public void onImageLoaded(AccountService.LoadFileResponse response){
+    public void onImageLoaded(AccountService.LoadPhotoResponse response){
         progressFrame.setVisibility(View.GONE);
-        fileUri = response.file;
-        changeContent();
+        bitmap = response.fileBitmap;
+        changeContent(bitmap);
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.d("myLogs", "Configuration changed " + newConfig.orientation);
-        changeContent();
+        changeContent(bitmap);
     }
 
-    private void changeContent() {
-        imageView.setImageURI(fileUri);
+    private void changeContent(Bitmap bitmap) {
+        if (bitmap != null)
+            imageView.setImageBitmap(bitmap);
     }
 
     @Override

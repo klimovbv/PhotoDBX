@@ -43,12 +43,9 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
     private boolean rotate;
     private int  orientation;
     private File photoFile;
-    private String fileName;
-    private ImageButton buttonPhoto, buttonChangeCamera;
     private HashSet <ImageButton> buttons;
     private int currentCameraIndex;
     private CameraPreview cameraPreview;
-    private Camera.CameraInfo cameraInfo;
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
@@ -64,9 +61,9 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.activity_camera_frameLayout);
         frameLayout.addView(cameraPreview, 0);
 
-        buttons = new HashSet<ImageButton>();
-        buttonPhoto = (ImageButton)findViewById(R.id.button_photo);
-        buttonChangeCamera = (ImageButton)findViewById(R.id.button_change_camera);
+        buttons = new HashSet<>();
+        ImageButton buttonPhoto = (ImageButton) findViewById(R.id.button_photo);
+        ImageButton buttonChangeCamera = (ImageButton) findViewById(R.id.button_change_camera);
         buttons.add(buttonPhoto);
         buttons.add(buttonChangeCamera);
 
@@ -117,7 +114,7 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
             camera.setParameters(params);
         }
         camera.setDisplayOrientation(90);
-        cameraInfo = new Camera.CameraInfo();
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         Camera.getCameraInfo(currentCameraIndex, cameraInfo);
         cameraPreview.setCamera(camera, cameraInfo);
     }
@@ -158,12 +155,8 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
     }
 
     private void takePicture(final int i) {
-        File sdPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        sdPath = new File(sdPath.getAbsolutePath() + "/PhotoToDBX");
-        sdPath.mkdir();
-        photoFile = new File(sdPath,
+        photoFile = new File(getCacheDir(),
                 new Utils().makeFileName(getApplicationContext()) + ".jpg");
-        fileName = photoFile.getAbsolutePath();
         camera.takePicture(null, null, new PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
@@ -186,7 +179,7 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                     outStream.close();
                     Intent intent = new Intent(NewPhotoActivity.this, UploadService.class);
-                    intent.putExtra("filePath", fileName);
+                    intent.putExtra("filePath", photoFile.getAbsolutePath());
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
                 } catch (IOException e) {

@@ -14,7 +14,9 @@ public class PhotoFilesListActivity extends BaseFilesListActivity {
     @Subscribe
     public void onLoadFileList(AccountService.LoadFileListResponse response){
         Log.d("myLogs", "----LoadFileListResponse -----" + response.fileList.size());
+        swipeRefresh.setRefreshing(false);
         attachLoadedFileList(response.fileList);
+
     }
 
     @Subscribe

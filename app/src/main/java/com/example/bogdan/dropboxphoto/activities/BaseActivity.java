@@ -21,8 +21,6 @@ public class BaseActivity extends ActionBarActivity {
     protected Bus bus;
     protected ActionScheduler scheduler;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

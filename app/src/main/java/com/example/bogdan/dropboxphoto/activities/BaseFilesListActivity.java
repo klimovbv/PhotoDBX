@@ -3,6 +3,7 @@ package com.example.bogdan.dropboxphoto.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,15 +16,15 @@ import android.widget.Toast;
 
 import com.example.bogdan.dropboxphoto.R;
 import com.example.bogdan.dropboxphoto.services.AccountService;
+import com.example.bogdan.dropboxphoto.views.BaseFileListAdapter;
 import com.example.bogdan.dropboxphoto.views.MainNavDrawer;
-import com.example.bogdan.dropboxphoto.views.MyAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity implements View.OnClickListener {
-    protected ArrayList<String> fileUIArrayList;
-    protected FilesListAdapter adapter;
+public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+    protected ArrayList<String> filesNamesList;
+    protected FileListAdapter adapter;
 
     protected String directory;
     protected ImageButton newFileButton;
@@ -34,6 +35,7 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
     protected View progressFrame;
     protected Class showFileActivity;
     protected Class makeFileActivity;
+    protected SwipeRefreshLayout swipeRefresh;
 
     public BaseFilesListActivity(String directory, Class showFileActivity, Class makeFileActivity) {
         this.directory = directory;
@@ -58,12 +60,13 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
         newFileButton.setOnClickListener(this);
         selectedFiles = new HashSet<>();
 
-        adapter = new FilesListAdapter(this, directory);
-        fileUIArrayList = adapter.getFileList();
+        adapter = new FileListAdapter(this, directory);
+        filesNamesList = adapter.getFileList();
 
-        ListView fileList = (ListView) findViewById(R.id.activity_file_list_listView);
-        fileList.setAdapter(adapter);
-        fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView filesListView = (ListView) findViewById(R.id.activity_file_list_listView);
+        filesListView.setAdapter(adapter);
+
+        filesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedItem = adapter.getItem(position);
@@ -75,7 +78,8 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
             }
         });
 
-        fileList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+        filesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 toggledFileSelection(adapter.getItem(position));
@@ -83,12 +87,24 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
             }
         });
 
-        scheduler.postEveryMilliseconds(new AccountService.LoadFileListRequest(directory), 1000*5);
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.activity_file_list_swipe_refresh);
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnRefreshListener(this);
+
+            swipeRefresh.setColorSchemeColors(
+                    Color.parseColor("#FF00DDFF"),
+                    Color.parseColor("#FF99CC00"),
+                    Color.parseColor("#FFFFBB33"),
+                    Color.parseColor("#FFFF4444")
+            );
+        }
+
+        scheduler.postEveryMilliseconds(new AccountService.LoadFileListRequest(directory), 1000 * 30);
     }
 
-    protected void attachLoadedFileList (ArrayList<String> loadedFileList){
-        fileUIArrayList.clear();
-        fileUIArrayList.addAll(loadedFileList);
+    protected void attachLoadedFileList(ArrayList<String> loadedFileList){
+        filesNamesList.clear();
+        filesNamesList.addAll(loadedFileList);
         adapter.notifyDataSetChanged();
         progressFrame.setVisibility(View.GONE);
     }
@@ -100,7 +116,7 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
 
     protected void deleteFiles(HashSet<String> fileNames){
         for (String fileName : fileNames){
-            fileUIArrayList.remove(fileName);
+            filesNamesList.remove(fileName);
             Toast.makeText(getApplicationContext(),
                     fileName + " удален.", Toast.LENGTH_SHORT).show();
         }
@@ -187,9 +203,9 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
         startActivity(intent);
     }
 
-    protected class FilesListAdapter extends MyAdapter {
+    protected class FileListAdapter extends BaseFileListAdapter {
 
-        public FilesListAdapter(BaseAuthenticatedActivity activity, String directory) {
+        public FileListAdapter(BaseAuthenticatedActivity activity, String directory) {
             super(activity, directory);
         }
 
@@ -203,5 +219,11 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
             }
             return view;
         }
+    }
+
+    @Override
+    public void onRefresh(){
+        swipeRefresh.setRefreshing(true);
+        bus.post(new AccountService.LoadFileListRequest(directory));
     }
 }
