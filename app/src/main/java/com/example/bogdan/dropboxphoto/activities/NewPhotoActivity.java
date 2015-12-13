@@ -104,7 +104,7 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
             camera = Camera.open(currentCameraIndex);
         } catch (Exception e){
             Log.e(TAG, "Could not open camera " + currentCameraIndex, e);
-            Toast.makeText(this, "Error establishing camera!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_error_establishing_camera), Toast.LENGTH_LONG).show();
             return;
         }
         Camera.Parameters params = camera.getParameters();
@@ -157,7 +157,7 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
     private void takePicture(final int i) {
         photoFile = new File(getCacheDir(),
                 new Utils().makeFileName(getApplicationContext()) + ".jpg");
-        camera.takePicture(null, null, new PictureCallback() {
+        camera.takePicture(shutterCallback, null, new PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -183,11 +183,17 @@ public class NewPhotoActivity extends BaseAuthenticatedActivity {
                     intent.putExtra("dirPath", PHOTO_DIR);
                     startService(intent);
                 } catch (IOException e) {
-                    Toast.makeText(NewPhotoActivity.this, "Error while saving file", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewPhotoActivity.this, getString(R.string.toast_error_saving_file), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
+    Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
+        @Override
+        public void onShutter() {
+        }
+    };
 
     public void onClickChangeCamera(View view) {
         currentCameraIndex = currentCameraIndex + 1 < Camera.getNumberOfCameras() ? currentCameraIndex + 1 : 0;

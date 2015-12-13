@@ -22,32 +22,7 @@
         android:name=".infrastructure.DbxApplication">
 
         <activity
-            android:name="com.dropbox.client2.android.AuthActivity"
-
-            android:launchMode="singleTask" >
-            <intent-filter>
-                <data android:scheme="db-e7r6jtptl6t3rz9" />
-
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-
-            android:name=".activities.NewPhotoActivity"
-            android:label="PhotoToDropBox" >
-        </activity>
-
-
-        <activity
-            android:name=".activities.NewVideoActivity"
-            android:label="PhotoToDropBox" >
-        </activity>       
-        <activity
-            android:name=".activities.PhotoFilesListActivity"
-            android:label="PhotoToDropBox" >
+            android:name=".activities.PhotoFilesListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -55,18 +30,26 @@
         </activity>
 
         <activity
-            android:name=".activities.VideoFilesListActivity"
-            android:label="PhotoToDropBox" >
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <data android:scheme="db-e7r6jtptl6t3rz9" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activities.VideoPlayer"
-            android:label="PhotoToDropBox" >
-        </activity>
-        <activity
+        <activity android:name=".activities.NewPhotoActivity"/>
 
+        <activity android:name=".activities.NewVideoActivity"/>
+
+        <activity android:name=".activities.VideoFilesListActivity"/>
+
+        <activity android:name=".activities.VideoPlayer"/>
+
+        <activity
             android:name=".activities.PreviewImageActivity"
-            android:label="PhotoToDropBox"
             android:configChanges="orientation">
         </activity>
 
@@ -77,6 +60,7 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
     </application>
 
 </manifest>

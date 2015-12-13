@@ -17,19 +17,19 @@ public class MainNavDrawer extends NavDrawer {
 
         addItem(new ActivityNavDrawerItem(
                 PhotoFilesListActivity.class,
-                "Photo List",
+                activity.getString(R.string.navdrawer_photolist),
                 R.drawable.ic_image_black_24dp,
                 R.id.include_main_nav_drawer_topItems));
 
         addItem(new ActivityNavDrawerItem(
                 VideoFilesListActivity.class,
-                "Video List",
+                activity.getString(R.string.navdrawer_videolist),
                 R.drawable.ic_camera_roll_black_24dp,
                 R.id.include_main_nav_drawer_topItems
         ));
 
         addItem(new BasicNavDrawerItem(
-                "Make Photo",
+                activity.getString(R.string.navdrawer_make_photo),
                 R.drawable.ic_add_a_photo_black_24dp,
                 R.id.include_main_nav_drawer_topItems) {
             @Override
@@ -39,7 +39,7 @@ public class MainNavDrawer extends NavDrawer {
         });
 
         addItem(new BasicNavDrawerItem(
-                "Make Video",
+                activity.getString(R.string.navdrawer_make_video),
                 R.drawable.ic_videocam_black_24dp,
                 R.id.include_main_nav_drawer_topItems) {
             @Override
@@ -49,7 +49,7 @@ public class MainNavDrawer extends NavDrawer {
         });
 
         addItem(new BasicNavDrawerItem(
-                "Logout",
+                activity.getString(R.string.navdrawer_logout),
                 R.drawable.ic_close_black_24dp,
                 R.id.include_main_nav_drawer_bottomItems) {
 

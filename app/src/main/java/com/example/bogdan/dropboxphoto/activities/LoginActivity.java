@@ -9,13 +9,13 @@ import android.widget.Button;
 import com.example.bogdan.dropboxphoto.R;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
-    private Button logninButton;
+    private Button loginButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        logninButton = (Button)findViewById(R.id.activity_login_loginButton);
-        logninButton.setOnClickListener(this);
+        loginButton = (Button)findViewById(R.id.activity_login_loginButton);
+        loginButton.setOnClickListener(this);
     }
 
     @Override

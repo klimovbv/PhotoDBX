@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">DropBoxPhoto</string>
+    <string name="app_name">Multimedia Box</string>
     <string name="action_settings">Settings</string>
-    <string name="login_to_dropbox">Login to Dropbox</string>
-    <string name="logout_from_dropbox">Log out</string>
-    <string name="show_photo">Show Photos</string>
-    <string name="upload_photo">Upload Photo to Dropbox</string>
-    <string name="show_video">Show Video</string>
-    <string name="upload_video">Upload Video to Dropbox</string>
+    <string name="navdrawer_photolist">Photo List</string>
+    <string name="navdrawer_videolist">Video List</string>
+    <string name="navdrawer_make_photo">Make Photo</string>
+    <string name="navdrawer_make_video">Make Video</string>
+    <string name="navdrawer_logout">Logout</string>
+    <string name="toast_file_deleted">" deleted."</string>
+    <string name="login_button_text">Connect to DBX</string>
+    <string name="toast_error_establishing_camera">Error establishing camera!</string>
+    <string name="toast_error_saving_file">Error while saving file.</string>
+    <string name="dialog_video_buffering">Buffering…</string>
+    <string name="dialog_delete_video">Delete Video</string>
+    <string name="dialog_delete_button">Delete</string>
+    <string name="dialog_cancel_button">Cancel</string>
+    <string name="dialog_delete_photo">Delete Photo</string>
 
 </resources>

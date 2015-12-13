@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+    public static final String EXTRA_FILE_NAME = "EXTRA_FILE_NAME";
     protected ArrayList<String> filesNamesList;
     protected FileListAdapter adapter;
 
@@ -118,7 +119,7 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
         for (String fileName : fileNames){
             filesNamesList.remove(fileName);
             Toast.makeText(getApplicationContext(),
-                    fileName + " удален.", Toast.LENGTH_SHORT).show();
+                    fileName + getString(R.string.toast_file_deleted), Toast.LENGTH_SHORT).show();
         }
         adapter.notifyDataSetChanged();
         progressFrame.setVisibility(View.GONE);
@@ -199,7 +200,7 @@ public abstract class BaseFilesListActivity extends BaseAuthenticatedActivity im
 
     protected void showFile(String fileToShow) {
         Intent intent = new Intent(this, showFileActivity);
-        intent.putExtra("filepath", fileToShow);
+        intent.putExtra(EXTRA_FILE_NAME, fileToShow);
         startActivity(intent);
     }
 

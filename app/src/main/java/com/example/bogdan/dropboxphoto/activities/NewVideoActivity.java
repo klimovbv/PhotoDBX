@@ -139,7 +139,7 @@ public class NewVideoActivity extends BaseAuthenticatedActivity {
             camera = Camera.open(currentCameraIndex);
         } catch (Exception e){
             Log.e(TAG, "Could not open camera " + currentCameraIndex, e);
-            Toast.makeText(this, "Error establishing camera!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_error_establishing_camera), Toast.LENGTH_LONG).show();
             return;
         }
 

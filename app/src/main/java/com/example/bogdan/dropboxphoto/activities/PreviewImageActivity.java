@@ -5,9 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,14 +16,12 @@ import com.example.bogdan.dropboxphoto.services.AccountService;
 import com.example.bogdan.dropboxphoto.views.TouchImageView;
 import com.squareup.otto.Subscribe;
 
-import java.io.IOException;
-
 
 public class PreviewImageActivity extends BaseAuthenticatedActivity {
 
     public static final int REQUEST_PHOTO_DELETE = 100;
     public static final String RESULT_EXTRA_PHOTO = "RESULT_EXTRA_PHOTO";
-    private String filePath;
+    private String viewingFileName;
     private TouchImageView imageView;
     private String directory;
     private View progressFrame;
@@ -36,11 +32,13 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
         setContentView(R.layout.activity_preview_photo);
         Intent intent = getIntent();
 
-        filePath = intent.getStringExtra("filepath");
+        viewingFileName = intent.getStringExtra(BaseFilesListActivity.EXTRA_FILE_NAME);
         directory = "/Photos/";
         imageView = (TouchImageView)findViewById(R.id.imageView);
         progressFrame = findViewById(R.id.activity_preview_photo_progressFrame);
         progressFrame.setVisibility(View.VISIBLE);
+
+        getSupportActionBar().setTitle(viewingFileName);
 
         toolbar.setNavigationIcon(R.drawable.ic_ab_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -50,7 +48,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
             }
         });
 
-        bus.post(new AccountService.LoadPhotoRequest(filePath));
+        bus.post(new AccountService.LoadPhotoRequest(viewingFileName));
     }
 
     @Subscribe
@@ -80,7 +78,7 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
 
     private void closeMessage(int resultCode){
         Intent data = new Intent();
-        data.putExtra(RESULT_EXTRA_PHOTO, filePath);
+        data.putExtra(RESULT_EXTRA_PHOTO, viewingFileName);
         setResult(resultCode, data);
         finish();
     }
@@ -89,16 +87,16 @@ public class PreviewImageActivity extends BaseAuthenticatedActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.activity_preview_photo_menuDelete){
             AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Delete Photo")
-                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    .setTitle(getString(R.string.dialog_delete_photo))
+                    .setPositiveButton(getString(R.string.dialog_delete_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             progressFrame.setVisibility(View.VISIBLE);
-                            bus.post(new AccountService.DeleteFileRequest(directory, null, filePath));
+                            bus.post(new AccountService.DeleteFileRequest(directory, null, viewingFileName));
                         }
                     })
                     .setCancelable(false)
-                    .setNeutralButton("Cancel", null)
+                    .setNeutralButton(getString(R.string.dialog_cancel_button), null)
                     .create();
             dialog.show();
         }

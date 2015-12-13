@@ -21,16 +21,17 @@ public class VideoPlayer extends BaseAuthenticatedActivity {
     private VideoView videoView;
     private String directory;
     private View progressFrame;
-    private String videoName;
+    private String viewingFileName;
 
     @Override
     protected void onDbxAppCreate(Bundle savedInstanceState) {
         setContentView(R.layout.video_player);
         Intent intent = getIntent();
-        videoName = intent.getStringExtra("filepath");
+        viewingFileName = intent.getStringExtra(BaseFilesListActivity.EXTRA_FILE_NAME);
         directory = "/Video/";
         progressFrame = findViewById(R.id.video_player_progressFrame);
 
+        getSupportActionBar().setTitle(viewingFileName);
 
         toolbar.setNavigationIcon(R.drawable.ic_ab_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -43,8 +44,8 @@ public class VideoPlayer extends BaseAuthenticatedActivity {
 
         videoView = (VideoView)findViewById(R.id.videoView);
         pDialog = new ProgressDialog(this);
-        pDialog.setTitle(videoName);
-        pDialog.setMessage("Buffering...");
+        pDialog.setTitle(viewingFileName);
+        pDialog.setMessage(getString(R.string.dialog_video_buffering));
         pDialog.setIndeterminate(false);
         pDialog.setCancelable(true);
         pDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -55,7 +56,7 @@ public class VideoPlayer extends BaseAuthenticatedActivity {
         });
         pDialog.show();
 
-        bus.post(new AccountService.LoadFileRequest(videoName));
+        bus.post(new AccountService.LoadFileRequest(viewingFileName));
     }
 
     @Subscribe
@@ -77,16 +78,16 @@ public class VideoPlayer extends BaseAuthenticatedActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.activity_preview_photo_menuDelete){
             AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Delete Video")
-                    .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    .setTitle(getString(R.string.dialog_delete_video))
+                    .setPositiveButton(getString(R.string.dialog_delete_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             progressFrame.setVisibility(View.VISIBLE);
-                            bus.post(new AccountService.DeleteFileRequest(directory, null, videoName));
+                            bus.post(new AccountService.DeleteFileRequest(directory, null, viewingFileName));
                         }
                     })
                     .setCancelable(false)
-                    .setNeutralButton("Cancel", null)
+                    .setNeutralButton(getString(R.string.dialog_cancel_button), null)
                     .create();
             dialog.show();
         }
